@@ -3,7 +3,8 @@ import org.jetbrains.intellij.tasks.PrepareSandboxTask
 import org.jetbrains.intellij.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
-import java.io.ByteArrayOutputStream
+
+fun properties(key: String) = project.findProperty(key).toString()
 
 buildscript {
     repositories {
@@ -24,14 +25,16 @@ plugins {
     id("org.jetbrains.intellij") version "1.4.0"
 }
 
+group = properties("pluginGroup")
+version = properties("pluginVersion")
+
 apply {
     plugin("kotlin")
     plugin("com.jetbrains.rdgen")
 }
 
 repositories {
-    maven { setUrl("https://cache-redirector.jetbrains.com/intellij-repository/snapshots") }
-    maven { setUrl("https://cache-redirector.jetbrains.com/maven-central") }
+    mavenCentral()
 }
 
 kotlin {
@@ -51,17 +54,8 @@ sourceSets {
     }
 }
 
-project.version = "${property("majorVersion")}." +
-        "${property("minorVersion")}." +
-        "${property("buildCounter")}"
 
-if (System.getenv("TEAMCITY_VERSION") != null) {
-    logger.lifecycle("##teamcity[buildNumber '${project.version}']")
-} else {
-    logger.lifecycle("Plugin version: ${project.version}")
-}
-
-val buildConfigurationProp = project.property("buildConfiguration").toString()
+val buildConfigurationProp = properties("buildConfiguration")
 
 val repoRoot by extra { project.rootDir }
 val isWindows by extra { Os.isFamily(Os.FAMILY_WINDOWS) }
@@ -76,103 +70,81 @@ val hashBaseDir = File(repoRoot, "build/rdgen")
 val csOutputRoot = File(repoRoot, "src/dotnet/RiderPlugin.EnhancedUnrealEngineDocumentation/obj/model")
 val ktOutputRoot = File(repoRoot, "src/rider/main/kotlin/com/jetbrains/rider/model")
 
-val currentBranchName = getBranchName()
-
 fun TaskContainerScope.setupCleanup(task: Task) {
     withType<Delete> {
         delete(task.outputs.files)
     }
 }
 
-fun getBranchName(): String {
-    val stdOut = ByteArrayOutputStream()
-    val result = project.exec {
-        executable = "git"
-        args = listOf("rev-parse", "--abbrev-ref", "HEAD")
-        workingDir = projectDir
-        standardOutput = stdOut
-    }
-    if (result.exitValue == 0) {
-        val output = stdOut.toString().trim()
-        if (output.isNotEmpty())
-            return output
-    }
-    return "net221"
-}
-
-changelog {
-    version.set(project.version.toString())
-    // https://github.com/JetBrains/gradle-changelog-plugin/blob/main/src/main/kotlin/org/jetbrains/changelog/Changelog.kt#L23
-    // This is just common semVerRegex with the addition of a forth optional group (number) ( x.x.x[.x][-alpha43] )
-    headerParserRegex.set(
-        """^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)\.?(0|[1-9]\d*)?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)
-            (?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?${'$'}"""
-            .trimMargin().toRegex())
-    groups.set(listOf("Added", "Changed", "Deprecated", "Removed", "Fixed", "Known Issues"))
-    keepUnreleasedSection.set(true)
-    itemPrefix.set("-")
-}
-
+// Configure Gradle IntelliJ Plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
 intellij {
-    type.set("RD")
-    instrumentCode.set(false)
-    downloadSources.set(false)
+    pluginName.set(properties("pluginName"))
+    version.set(properties("platformVersion"))
+    type.set(properties("platformType"))
+    downloadSources.set(properties("platformDownloadSources").toBoolean())
+    updateSinceUntilBuild.set(true)
 
-    plugins.set(listOf("com.jetbrains.rider-cpp"))
+    // Plugin Dependencies. Uses `platformPlugins` property from the gradle.properties file.
+    plugins.set(properties("platformPlugins").split(',').map(String::trim).filter(String::isNotEmpty))
+}
 
-    val dependencyPath = File(projectDir, "dependencies")
-    if (dependencyPath.exists()) {
-        localPath.set(dependencyPath.canonicalPath)
-        println("Will use ${File(localPath.get(), "build.txt").readText()} from $localPath as RiderSDK")
-    } else {
-        version.set("${project.property("majorVersion")}-SNAPSHOT")
-        println("Will download and use build/riderRD-${version.get()} as RiderSDK")
-    }
-
-    tasks {
-        val currentReleaseNotesAsHtml = """
-            <body>
-            <p><b>New in "${project.version}"</b></p>
-            <p>${changelog.getLatest().toHTML()}</p>
-            <p>See the <a href="https://github.com/JetBrains/EnhancedUnrealEngineDocumentation/blob/$currentBranchName/CHANGELOG.md">CHANGELOG</a> for more details and history.</p>
-            </body>
-        """.trimIndent()
-
-        val currentReleaseNotesAsMarkdown = """
-            ## New in ${project.version}
-            ${changelog.getLatest().toText()}
-            See the [CHANGELOG](https://github.com/JetBrains/EnhancedUnrealEngineDocumentation/blob/$currentBranchName/CHANGELOG.md) for more details and history.
-        """.trimIndent()
-        val dumpCurrentChangelog by registering {
-            val outputFile = File("${project.buildDir}/release_notes.md")
-            outputs.file(outputFile)
-            doLast { outputFile.writeText(currentReleaseNotesAsMarkdown) }
-        }
-
-        // PatchPluginXml gets latest (always Unreleased) section from current changelog and write it into plugin.xml
-        // dumpCurrentChangelog dumps the same section to file (for Marketplace changelog)
-        // After, patchChangelog rename [Unreleased] to [202x.x.x.x] and create new empty Unreleased.
-        // So order is important!
-        patchPluginXml { changeNotes.set( provider { currentReleaseNotesAsHtml }) }
-        patchChangelog { mustRunAfter(patchPluginXml, dumpCurrentChangelog) }
-
-        publishPlugin {
-            dependsOn(patchPluginXml, dumpCurrentChangelog, patchChangelog)
-            token.set(System.getenv("EnhancedUnrealEngineDocumentation_intellijPublishToken"))
-
-            val pubChannels = project.findProperty("publishChannels")
-            if ( pubChannels != null) {
-                val chan = pubChannels.toString().split(',')
-                println("Channels for publish $chan")
-                channels.set(chan)
-            } else {
-                channels.set(listOf("alpha"))
-            }
-        }
-    }
+// Configure Gradle Changelog Plugin - read more: https://github.com/JetBrains/gradle-changelog-plugin
+changelog {
+    version.set(properties("pluginVersion"))
+    groups.set(emptyList())
 }
 
 tasks {
+    // Set the JVM compatibility versions
+    properties("javaVersion").let {
+        withType<JavaCompile> {
+            sourceCompatibility = it
+            targetCompatibility = it
+        }
+        withType<KotlinCompile> {
+            kotlinOptions.jvmTarget = it
+        }
+    }
+
+    wrapper {
+        gradleVersion = properties("gradleVersion")
+    }
+
+    patchPluginXml {
+        version.set(properties("pluginVersion"))
+        sinceBuild.set(properties("pluginSinceBuild"))
+        untilBuild.set(properties("pluginUntilBuild"))
+
+        // Extract the <!-- Plugin description --> section from README.md and provide for the plugin's manifest
+        pluginDescription.set(
+                projectDir.resolve("README.md").readText().lines().run {
+                    val start = "<!-- Plugin description -->"
+                    val end = "<!-- Plugin description end -->"
+
+                    if (!containsAll(listOf(start, end))) {
+                        throw GradleException("Plugin description section not found in README.md:\n$start ... $end")
+                    }
+                    subList(indexOf(start) + 1, indexOf(end))
+                }.joinToString("\n").run { org.jetbrains.changelog.markdownToHTML(this) }
+        )
+
+        // Get the latest available change notes from the changelog file
+        changeNotes.set(provider {
+            changelog.run {
+                getOrNull(properties("pluginVersion")) ?: getLatest()
+            }.toHTML()
+        })
+    }
+
+    publishPlugin {
+        dependsOn("patchChangelog")
+        token.set(System.getenv("PUBLISH_TOKEN"))
+        // pluginVersion is based on the SemVer (https://semver.org) and supports pre-release labels, like 2.1.7-alpha.3
+        // Specify pre-release label to publish the plugin in a custom Release Channel automatically. Read more:
+        // https://plugins.jetbrains.com/docs/intellij/deployment.html#specifying-a-release-channel
+        channels.set(listOf(properties("pluginVersion").split('-').getOrElse(1) { "default" }.split('.').first()))
+    }
+
     val dotNetSdkPath by lazy {
         val sdkPath = setupDependencies.get().idea.get().classes.resolve("lib").resolve("DotNetSdkForRdPlugins")
         assert(sdkPath.isDirectory)
@@ -199,12 +171,6 @@ tasks {
             showStandardStreams = true
             showExceptions = true
             exceptionFormat = TestExceptionFormat.FULL
-        }
-    }
-
-    withType<KotlinCompile> {
-        kotlinOptions {
-            jvmTarget = "11"
         }
     }
 
