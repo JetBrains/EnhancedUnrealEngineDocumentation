@@ -12,4 +12,4 @@ pluginManagement {
     }
 }
 
-rootProject.name = "DocsByBenUI"
+rootProject.name = "EnhancedUnrealEngineDocumentation"

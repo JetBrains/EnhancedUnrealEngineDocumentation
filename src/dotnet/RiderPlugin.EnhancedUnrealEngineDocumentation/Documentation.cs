@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace RiderPlugin.DocsByBenUI
+namespace RiderPlugin.EnhancedUnrealEngineDocumentation
 {
     public static class DocumentationData
     {

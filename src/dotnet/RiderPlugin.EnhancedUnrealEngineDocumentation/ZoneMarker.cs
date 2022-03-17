@@ -4,7 +4,7 @@ using JetBrains.ReSharper.Psi;
 using JetBrains.Rider.Backend.Env;
 using JetBrains.Rider.Backend.Product;
 
-namespace RiderPlugin.DocsByBenUI
+namespace RiderPlugin.EnhancedUnrealEngineDocumentation
 {
     [ZoneMarker]
     public class ZoneMarker :

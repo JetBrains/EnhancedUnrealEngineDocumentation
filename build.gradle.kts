@@ -66,14 +66,14 @@ val buildConfigurationProp = project.property("buildConfiguration").toString()
 val repoRoot by extra { project.rootDir }
 val isWindows by extra { Os.isFamily(Os.FAMILY_WINDOWS) }
 val idePluginId by extra { "RiderPlugin" }
-val dotNetSolutionId by extra { "DocsByBenUI" }
+val dotNetSolutionId by extra { "EnhancedUnrealEngineDocumentation" }
 val dotNetDir by extra { File(repoRoot, "src/dotnet") }
 val dotNetBinDir by extra { dotNetDir.resolve("$idePluginId.$dotNetSolutionId").resolve("bin") }
 val dotNetPluginId by extra { "$idePluginId.${project.name}" }
 val dotNetSolution by extra { File(repoRoot, "$dotNetSolutionId.sln") }
 val modelDir = File(repoRoot, "protocol/src/main/kotlin/model")
 val hashBaseDir = File(repoRoot, "build/rdgen")
-val csOutputRoot = File(repoRoot, "src/dotnet/RiderPlugin.DocsByBenUI/obj/model")
+val csOutputRoot = File(repoRoot, "src/dotnet/RiderPlugin.EnhancedUnrealEngineDocumentation/obj/model")
 val ktOutputRoot = File(repoRoot, "src/rider/main/kotlin/com/jetbrains/rider/model")
 
 val currentBranchName = getBranchName()
@@ -134,14 +134,14 @@ intellij {
             <body>
             <p><b>New in "${project.version}"</b></p>
             <p>${changelog.getLatest().toHTML()}</p>
-            <p>See the <a href="https://github.com/JetBrains/DocsByBenUI/blob/$currentBranchName/CHANGELOG.md">CHANGELOG</a> for more details and history.</p>
+            <p>See the <a href="https://github.com/JetBrains/EnhancedUnrealEngineDocumentation/blob/$currentBranchName/CHANGELOG.md">CHANGELOG</a> for more details and history.</p>
             </body>
         """.trimIndent()
 
         val currentReleaseNotesAsMarkdown = """
             ## New in ${project.version}
             ${changelog.getLatest().toText()}
-            See the [CHANGELOG](https://github.com/JetBrains/DocsByBenUI/blob/$currentBranchName/CHANGELOG.md) for more details and history.
+            See the [CHANGELOG](https://github.com/JetBrains/EnhancedUnrealEngineDocumentation/blob/$currentBranchName/CHANGELOG.md) for more details and history.
         """.trimIndent()
         val dumpCurrentChangelog by registering {
             val outputFile = File("${project.buildDir}/release_notes.md")
@@ -158,7 +158,7 @@ intellij {
 
         publishPlugin {
             dependsOn(patchPluginXml, dumpCurrentChangelog, patchChangelog)
-            token.set(System.getenv("DocsByBenUI_intellijPublishToken"))
+            token.set(System.getenv("EnhancedUnrealEngineDocumentation_intellijPublishToken"))
 
             val pubChannels = project.findProperty("publishChannels")
             if ( pubChannels != null) {
@@ -259,7 +259,7 @@ tasks {
 
         inputs.file(file(dotNetSolution))
         inputs.dir(file("$repoRoot/src/dotnet"))
-        outputs.dir(file("$repoRoot/src/dotnet/RiderPlugin.DocsByBenUI/bin/RiderPlugin.DocsByBenUI/$buildConfigurationProp"))
+        outputs.dir(file("$repoRoot/src/dotnet/RiderPlugin.EnhancedUnrealEngineDocumentation/bin/RiderPlugin.EnhancedUnrealEngineDocumentation/$buildConfigurationProp"))
 
         doLast {
             val warningsAsErrors: String by project.extra

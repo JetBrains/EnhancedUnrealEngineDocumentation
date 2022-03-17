@@ -2,7 +2,7 @@
 using System.Linq;
 using JetBrains.Util;
 
-namespace RiderPlugin.DocsByBenUI
+namespace RiderPlugin.EnhancedUnrealEngineDocumentation
 {
     public class ReflectionDescription
     {
@@ -28,7 +28,8 @@ namespace RiderPlugin.DocsByBenUI
                    $"<b>{nameof(subgroup)}</b>: {subgroup}<br>" +
                    $"<b>{nameof(position)}</b>: {position}<br>" +
                    $"<b>{nameof(type)}</b>: {type}<br>" +
-                   $"<a href=\"https://benui.ca/unreal/uproperty/#{name.ToLower()}\">Full Documentation</a>";
+                   $"<a href=\"https://benui.ca/unreal/uproperty/#{name.ToLower()}\">Full Documentation</a><br>" +
+                   documentation.images.Select(it => $"<img src=\"https://benui.ca/{it}\">").Join("");
         }
     }
 

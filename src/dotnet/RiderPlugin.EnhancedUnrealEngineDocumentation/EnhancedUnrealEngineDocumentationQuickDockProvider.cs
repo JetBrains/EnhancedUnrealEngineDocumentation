@@ -9,12 +9,12 @@ using JetBrains.ReSharper.Psi.Cpp.UE4;
 using JetBrains.ReSharperCpp.RiderPlugin.QuickDoc;
 using YamlDotNet.Serialization;
 
-namespace RiderPlugin.DocsByBenUI
+namespace RiderPlugin.EnhancedUnrealEngineDocumentation
 {
     [QuickDocProvider(1)]
-    public class BenUIQuickDockProvider : RiderCppQuickDocProvider
+    public class EnhancedUnrealEngineDocumentationQuickDockProvider : RiderCppQuickDocProvider
     {
-        public BenUIQuickDockProvider(CppGlobalSymbolCache symbolCache, ICppUE4SolutionDetector ue4SolutionDetector, CppHighlighterColorCache colorCache, ITheming theming, CppDeclaredElementDescriptionProvider descriptionProvider, IPsiServices psiServices) : base(symbolCache, ue4SolutionDetector, colorCache, theming, descriptionProvider, psiServices)
+        public EnhancedUnrealEngineDocumentationQuickDockProvider(CppGlobalSymbolCache symbolCache, ICppUE4SolutionDetector ue4SolutionDetector, CppHighlighterColorCache colorCache, ITheming theming, CppDeclaredElementDescriptionProvider descriptionProvider, IPsiServices psiServices) : base(symbolCache, ue4SolutionDetector, colorCache, theming, descriptionProvider, psiServices)
         {
         }
 

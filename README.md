@@ -1,6 +1,6 @@
-# DocsByBenUI for Unreal Engine
+# EnhancedUnrealEngineDocumentation for Unreal Engine
 
-<p>The DocsByBenUI plugin enables advanced integration between JetBrains <a href="https://www.jetbrains.com/lp/rider-unreal/">Rider</a> and Epic Games’ <a href="https://www.unrealengine.com/en-US/">Unreal Editor</a>.</p>
+<p>The EnhancedUnrealEngineDocumentation plugin enables advanced integration between JetBrains <a href="https://www.jetbrains.com/lp/rider-unreal/">Rider</a> and Epic Games’ <a href="https://www.unrealengine.com/en-US/">Unreal Editor</a>.</p>
 
 <p>Rider is a fast and powerful IDE for Unreal Engine and C++ development. It provides rich code navigation, inspections, refactorings, understands Blueprints and the Unreal Engine reflection mechanism, and supports HLSL. The <em>Unreal Engine edition </em>of Rider is currently available as a free Early Preview for Windows only. <a href="https://www.jetbrains.com/rider/unreal/">Join the Early Preview</a>.</p>
 
@@ -25,13 +25,13 @@
 </ul>
  
 <h2 id="plugin-structure">Plugin structure</h2>
-<p>There are two plugins under the hood, the <strong>DocsByBenUI</strong> plugin for Rider and the <strong>RiderLink</strong> plugin for Unreal Editor, packed together.</p>
+<p>There are two plugins under the hood, the <strong>EnhancedUnrealEngineDocumentation</strong> plugin for Rider and the <strong>RiderLink</strong> plugin for Unreal Editor, packed together.</p>
 
 <h2 id="setup-environment">Setting up development environment</h2>
 <p>For the instruction on how to setup development environment and contribute to the project, please, refer to <a href="SETUP.md">Setting up the environment</a> page</p>
 
 <h2 id="installation">Installation</h2>
-<p><strong>DocsByBenUI</strong> is bundled with Rider. Starting with Rider for Unreal Engine 2020.2.1, it’s also distributed via the JetBrains plugin <a href="https://plugins.jetbrains.com/plugin/14989-unreal-link">marketplace</a>.</p>
+<p><strong>EnhancedUnrealEngineDocumentation</strong> is bundled with Rider. Starting with Rider for Unreal Engine 2020.2.1, it’s also distributed via the JetBrains plugin <a href="https://plugins.jetbrains.com/plugin/14989-unreal-link">marketplace</a>.</p>
 
 <p><strong>RiderLink</strong> is installed by Rider itself, there is no need to install it manually. The first time you open an Unreal Engine project in Rider, you'll see a notification that the RiderLink plugin is missing and an invitation to install it. If you skip this popup message, you can install the plugin later by going to the Rider settings on the <em>Languages and Frameworks | Unreal Engine</em> page.</p>
 
@@ -59,7 +59,7 @@
     </li>
 </ul>
 
-<p>DocsByBenUI extends this functionality and introduces the ability to navigate to the Blueprint inside the Unreal Editor from your C++ code.</p>
+<p>EnhancedUnrealEngineDocumentation extends this functionality and introduces the ability to navigate to the Blueprint inside the Unreal Editor from your C++ code.</p>
 <img alt="Interact with blueprints" width="800" src="https://plugins.jetbrains.com/files/14989/screenshot_23450.png"/>
 
 <h3 id="manage_the_game">Manage the game</h3>
@@ -67,7 +67,7 @@
 <img alt="Manage the game" width="800" src="https://plugins.jetbrains.com/files/14989/screenshot_23451.png"/>
 
 <h3 id="browse_the_unreal_editor_log">Browse the Unreal Editor log</h3>
-<p>DocsByBenUI offers you an enhanced version of the Unreal Editor log output panel with colored text for easy reading, as well as verbosity and event category filters. You can also click on any highlighted link to navigate to the related source code line.</p>
+<p>EnhancedUnrealEngineDocumentation offers you an enhanced version of the Unreal Editor log output panel with colored text for easy reading, as well as verbosity and event category filters. You can also click on any highlighted link to navigate to the related source code line.</p>
 <img alt="Browse the Unreal Editor log" width="800" src="https://plugins.jetbrains.com/files/14989/screenshot_23452.png"/>
 
 <a href="https://www.jetbrains.com/help/rider/Working_with_Unreal_Engine.html">Learn more about Rider for Unreal Engine >></a>
@@ -76,7 +76,7 @@
 <p>The plugin and Rider for Unreal Engine itself are in active development now, so there could be some issues. Please share your feedback and report any bugs you encounter:</p>
 <ul>
     <li>
-        Submit plugin-specific issues to the <a href="https://github.com/JetBrains/DocsByBenUI/issues">GitHub Issues page</a>.
+        Submit plugin-specific issues to the <a href="https://github.com/JetBrains/EnhancedUnrealEngineDocumentation/issues">GitHub Issues page</a>.
     </li>
     <li>
         Rider-specific issues should be directed to the <a href="https://youtrack.jetbrains.com/issues/RIDER">Rider tracker</a>.
@@ -124,4 +124,4 @@ Path to old plugin:
 
 <p>This warning message means that installation was successful, but updating the project files in Rider failed. Everything should work fine, except the plugin will not appear in the <code>/Plugins/Developer</code> folder in the Explorer view.</p>
 
-<p>If you have any issues with the plugin that you can’t resolve, please contact the developers via <a href="https://github.com/JetBrains/DocsByBenUI/issues">GitHub Issues</a>.</p>
+<p>If you have any issues with the plugin that you can’t resolve, please contact the developers via <a href="https://github.com/JetBrains/EnhancedUnrealEngineDocumentation/issues">GitHub Issues</a>.</p>

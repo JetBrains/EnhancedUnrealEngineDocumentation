@@ -1,6 +1,6 @@
 <idea-plugin allow-bundled-update="true">
   <id>unreal-link</id>
-  <name>DocsByBenUI</name>
+  <name>EnhancedUnrealEngineDocumentation</name>
   <version>_PLACEHOLDER_</version>
   <vendor url="https://www.jetbrains.com/">JetBrains</vendor>
   <idea-version since-build="_PLACEHOLDER_" until-build="_PLACEHOLDER_" />
@@ -8,14 +8,14 @@
   <depends>com.jetbrains.rider-cpp</depends>
 
   <description><![CDATA[
-  TODO: add description for the DocsByBenUI plugin
-  TODO: add description for the DocsByBenUI plugin
-  TODO: add description for the DocsByBenUI plugin
-  TODO: add description for the DocsByBenUI plugin
-  TODO: add description for the DocsByBenUI plugin
-  TODO: add description for the DocsByBenUI plugin
-  TODO: add description for the DocsByBenUI plugin
-  TODO: add description for the DocsByBenUI plugin
+  TODO: add description for the EnhancedUnrealEngineDocumentation plugin
+  TODO: add description for the EnhancedUnrealEngineDocumentation plugin
+  TODO: add description for the EnhancedUnrealEngineDocumentation plugin
+  TODO: add description for the EnhancedUnrealEngineDocumentation plugin
+  TODO: add description for the EnhancedUnrealEngineDocumentation plugin
+  TODO: add description for the EnhancedUnrealEngineDocumentation plugin
+  TODO: add description for the EnhancedUnrealEngineDocumentation plugin
+  TODO: add description for the EnhancedUnrealEngineDocumentation plugin
     ]]>
   </description>
 
@@ -27,6 +27,6 @@
 
   </extensions>
 
-  <actions resource-bundle="messages.DocsByBenUIBundle">
+  <actions resource-bundle="messages.EnhancedUnrealEngineDocumentationBundle">
   </actions>
 </idea-plugin>

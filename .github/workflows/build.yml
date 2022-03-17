@@ -1,4 +1,4 @@
-name: Build DocsByBenUI
+name: Build EnhancedUnrealEngineDocumentation
 on:
   push:
     paths-ignore:
@@ -22,7 +22,7 @@ jobs:
       fail-fast: false
       matrix:
         config:
-        - { name: "Windows Latest", artifact-prefix: "DocsByBenUI-",
+        - { name: "Windows Latest", artifact-prefix: "EnhancedUnrealEngineDocumentation-",
             os: windows-latest,
             SEP: \ }
 
