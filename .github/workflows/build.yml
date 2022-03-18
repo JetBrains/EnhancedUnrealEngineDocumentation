@@ -49,7 +49,8 @@ jobs:
 #           echo "::set-output name=pluginVerifierHomeDir::~/.pluginVerifier"
 
 #           ./gradlew listProductsReleases # prepare list of IDEs for Plugin Verifier
-
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
       # Build artifact using buildPlugin Gradle task
       - name: Build Plugin
         run: ./gradlew buildPlugin -PbuildConfiguration=Release
