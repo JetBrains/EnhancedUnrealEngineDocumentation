@@ -51,6 +51,8 @@ jobs:
 #           ./gradlew listProductsReleases # prepare list of IDEs for Plugin Verifier
       - name: Make gradlew executable
         run: chmod +x ./gradlew
+      - name: Make dotnet.cmd executable
+        run: chmod +x ./tools/dotnet.cmd
       # Build artifact using buildPlugin Gradle task
       - name: Build Plugin
         run: ./gradlew buildPlugin -PbuildConfiguration=Release
