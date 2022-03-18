@@ -52,7 +52,7 @@ jobs:
 
       # Build artifact using buildPlugin Gradle task
       - name: Build Plugin
-        run: ./gradlew buildPlugin --buildConfiguration=Release
+        run: ./gradlew buildPlugin -PbuildConfiguration=Release
 
       # Prepare plugin archive content for creating artifact
       - name: Prepare Plugin Artifact
