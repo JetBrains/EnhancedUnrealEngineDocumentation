@@ -1,0 +1,28 @@
+# Build artifacts
+[Bb]in/
+[Oo]bj/
+build
+output
+.gradle
+.tmp
+out/*
+*.generated.*
+NuGet.Config
+
+# User-specific files
+*.suo
+*.user
+*.sln.docstates
+*.sln.binlog
+*.cache
+
+# IDEs
+.idea
+.vs
+_ReSharper*
+_dotTrace*
+
+# Tmp release files
+release_notes.md
+
+documentation/

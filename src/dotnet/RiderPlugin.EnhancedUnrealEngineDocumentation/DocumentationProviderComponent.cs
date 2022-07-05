@@ -1,0 +1,45 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
+using System.Threading;
+using JetBrains.Application;
+using JetBrains.Application.Environment;
+using JetBrains.Util;
+using YamlDotNet.Serialization;
+
+namespace RiderPlugin.EnhancedUnrealEngineDocumentation
+{
+    [ShellComponent]
+    public class DocumentationProviderComponent
+    {
+        public Dictionary<string, ReflectionDescription> Documentation { get; }
+        
+        public DocumentationProviderComponent(ApplicationPackages applicationPackages,
+            IDeployedPackagesExpandLocationResolver resolver)
+        {
+            Documentation = new Dictionary<string, ReflectionDescription>();
+            var pathToDocumentation = GetPathToDocumentationFolder(applicationPackages, resolver);
+            
+            foreach (var enumerateFile in pathToDocumentation.GetChildFiles())
+            {
+                var deserializer = new DeserializerBuilder().Build();
+                using var reader = File.OpenText(enumerateFile.FullPath);
+                var reflectionDescriptions = deserializer.Deserialize<ReflectionDescriptions>(reader);
+                foreach (var reflectionDescriptionsSpecifier in reflectionDescriptions.specifiers)
+                {
+                    Documentation[reflectionDescriptionsSpecifier.name] = reflectionDescriptionsSpecifier;
+                }
+            }
+        }
+
+        private static FileSystemPath GetPathToDocumentationFolder(ApplicationPackages applicationPackages, IDeployedPackagesExpandLocationResolver resolver)
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            var package = applicationPackages.FindPackageWithAssembly(assembly, OnError.LogException);
+            var installDirectory = resolver.GetDeployedPackageDirectory(package);
+            var editorPluginPathFile = installDirectory.Parent.Combine("documentation").Combine("yaml");
+            return editorPluginPathFile;
+        }
+    }
+}

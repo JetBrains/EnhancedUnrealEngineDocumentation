@@ -1,0 +1,32 @@
+<idea-plugin allow-bundled-update="true">
+  <id>EnhancedUnrealEngineDocumentation</id>
+  <name>EnhancedUnrealEngineDocumentation</name>
+  <version>_PLACEHOLDER_</version>
+  <vendor url="https://www.jetbrains.com/">JetBrains</vendor>
+  <idea-version since-build="_PLACEHOLDER_" until-build="_PLACEHOLDER_" />
+  <depends>com.intellij.modules.rider</depends>
+  <depends>com.jetbrains.rider-cpp</depends>
+
+  <description><![CDATA[
+  TODO: add description for the EnhancedUnrealEngineDocumentation plugin
+  TODO: add description for the EnhancedUnrealEngineDocumentation plugin
+  TODO: add description for the EnhancedUnrealEngineDocumentation plugin
+  TODO: add description for the EnhancedUnrealEngineDocumentation plugin
+  TODO: add description for the EnhancedUnrealEngineDocumentation plugin
+  TODO: add description for the EnhancedUnrealEngineDocumentation plugin
+  TODO: add description for the EnhancedUnrealEngineDocumentation plugin
+  TODO: add description for the EnhancedUnrealEngineDocumentation plugin
+    ]]>
+  </description>
+
+  <project-components>
+
+  </project-components>
+
+  <extensions defaultExtensionNs="com.intellij">
+
+  </extensions>
+
+  <actions resource-bundle="messages.EnhancedUnrealEngineDocumentationBundle">
+  </actions>
+</idea-plugin>
