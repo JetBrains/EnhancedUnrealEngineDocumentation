@@ -1,4 +1,5 @@
-﻿using JetBrains.Application.UI.Components.Theming;
+﻿using System.Collections.Generic;
+using JetBrains.Application.UI.Components.Theming;
 using JetBrains.ReSharper.Feature.Services.Cpp.QuickDoc;
 using JetBrains.ReSharper.Feature.Services.Cpp.UE4;
 using JetBrains.ReSharper.Feature.Services.QuickDoc;
@@ -14,7 +15,7 @@ namespace RiderPlugin.EnhancedUnrealEngineDocumentation
     [QuickDocProvider(1)]
     public class EnhancedUnrealEngineDocumentationQuickDockProvider : RiderCppQuickDocProvider
     {
-        public EnhancedUnrealEngineDocumentationQuickDockProvider(CppGlobalSymbolCache symbolCache, ICppUE4SolutionDetector ue4SolutionDetector, CppHighlighterColorCache colorCache, ITheming theming, CppDeclaredElementDescriptionProvider descriptionProvider, IPsiServices psiServices) : base(symbolCache, ue4SolutionDetector, colorCache, theming, descriptionProvider, psiServices)
+        public EnhancedUnrealEngineDocumentationQuickDockProvider(CppGlobalSymbolCache symbolCache, ICppUE4SolutionDetector ue4SolutionDetector, CppHighlighterColorCache colorCache, ITheming theming, CppDeclaredElementDescriptionProvider descriptionProvider, IPsiServices psiServices, IEnumerable<CppDeclaredElementOnlineHelpProvider> onlineHelpProviders) : base(symbolCache, ue4SolutionDetector, colorCache, theming, descriptionProvider, psiServices, onlineHelpProviders)
         {
         }
 
