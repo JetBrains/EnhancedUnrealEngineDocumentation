@@ -17,6 +17,8 @@ jobs:
       # Check out current repository
       - name: Fetch Sources
         uses: actions/checkout@v2.4.0
+        with:
+          submodules: 'recursive'
 
       # Validate wrapper
       - name: Gradle Wrapper Validation
