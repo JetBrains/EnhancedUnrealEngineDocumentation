@@ -30,6 +30,9 @@ jobs:
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
+
+      - name: Make dotnet.cmd executable
+        run: chmod +x ./tools/dotnet.cmd
         
       # Update Unreleased section with the current release note
       - name: Patch Changelog
