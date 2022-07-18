@@ -8,7 +8,5 @@ semantic versioning but uses version numbers based on JetBrains [Rider](https://
 The EnhancedUnrealEngineDocumentation plugin adds a convenient way to get improved documentation for Unreal Engine reflection specifiers provided by [BenUI](https://twitter.com/_benui) right in the [Rider IDE](https://www.jetbrains.com/rider/)
 
 ## [Unreleased]
-
-### Changed
-
-### Fixed
+### Added
+- Initial release
