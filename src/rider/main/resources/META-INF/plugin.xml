@@ -8,14 +8,7 @@
   <depends>com.jetbrains.rider-cpp</depends>
 
   <description><![CDATA[
-  TODO: add description for the EnhancedUnrealEngineDocumentation plugin
-  TODO: add description for the EnhancedUnrealEngineDocumentation plugin
-  TODO: add description for the EnhancedUnrealEngineDocumentation plugin
-  TODO: add description for the EnhancedUnrealEngineDocumentation plugin
-  TODO: add description for the EnhancedUnrealEngineDocumentation plugin
-  TODO: add description for the EnhancedUnrealEngineDocumentation plugin
-  TODO: add description for the EnhancedUnrealEngineDocumentation plugin
-  TODO: add description for the EnhancedUnrealEngineDocumentation plugin
+The EnhancedUnrealEngineDocumentation plugin adds a convenient way to get improved documentation for Unreal Engine reflection specifiers provided by BenUI right in the Rider IDE.
     ]]>
   </description>
 
