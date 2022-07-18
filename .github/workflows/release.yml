@@ -35,6 +35,9 @@ jobs:
           ${{ github.event.release.body }}
           EOM`"
 
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
       # Publish the plugin to the Marketplace
       - name: Publish Plugin
         env:
