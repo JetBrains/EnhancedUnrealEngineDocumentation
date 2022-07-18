@@ -32,6 +32,9 @@ jobs:
           java-version: 11
           cache: gradle
           
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+        
       # Set environment variables
       - name: Export Properties
         id: properties
@@ -51,10 +54,10 @@ jobs:
 #           echo "::set-output name=pluginVerifierHomeDir::~/.pluginVerifier"
 
 #           ./gradlew listProductsReleases # prepare list of IDEs for Plugin Verifier
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
+
       - name: Make dotnet.cmd executable
         run: chmod +x ./tools/dotnet.cmd
+
       # Build artifact using buildPlugin Gradle task
       - name: Build Plugin
         run: ./gradlew buildPlugin -PbuildConfiguration=Release
