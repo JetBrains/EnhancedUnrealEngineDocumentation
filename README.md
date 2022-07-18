@@ -28,4 +28,4 @@ Mouse over
 
 ## License
 
-MIT License
+Apache 2.0
