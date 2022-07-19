@@ -23,6 +23,8 @@ namespace RiderPlugin.EnhancedUnrealEngineDocumentation
             
             foreach (var enumerateFile in pathToDocumentation.GetChildFiles())
             {
+                if (enumerateFile.NameWithoutExtension.Equals("args")) continue;
+                
                 var deserializer = new DeserializerBuilder().Build();
                 using var reader = File.OpenText(enumerateFile.FullPath);
                 var reflectionDescriptions = deserializer.Deserialize<ReflectionDescriptions>(reader);
