@@ -15,7 +15,7 @@ namespace RiderPlugin.EnhancedUnrealEngineDocumentation
     [QuickDocProvider(1)]
     public class EnhancedUnrealEngineDocumentationQuickDockProvider : RiderCppQuickDocProvider
     {
-        public EnhancedUnrealEngineDocumentationQuickDockProvider(CppGlobalSymbolCache symbolCache, ICppUE4SolutionDetector ue4SolutionDetector, CppHighlighterColorCache colorCache, ITheming theming, CppDeclaredElementDescriptionProvider descriptionProvider, IPsiServices psiServices, IEnumerable<CppDeclaredElementOnlineHelpProvider> onlineHelpProviders) : base(symbolCache, ue4SolutionDetector, colorCache, theming, descriptionProvider, psiServices, onlineHelpProviders)
+        public EnhancedUnrealEngineDocumentationQuickDockProvider(CppGlobalSymbolCache symbolCache, ICppUE4SolutionDetector ue4SolutionDetector, CppHighlighterColorCache colorCache, ITheming theming, CppDeclaredElementDescriptionProvider descriptionProvider, IPsiServices psiServices) : base(symbolCache, ue4SolutionDetector, colorCache, theming, descriptionProvider, psiServices)
         {
         }
 
