@@ -1,5 +1,6 @@
 # EnhancedUnrealEngineDocumentation
 
+[![official JetBrains project](https://jb.gg/badges/official-flat-square.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
 [![Build EnhancedUnrealEngineDocumentation](https://github.com/DecoyRS/EnhancedUnrealEngineDocumentation/actions/workflows/build.yml/badge.svg)](https://github.com/DecoyRS/EnhancedUnrealEngineDocumentation/actions/workflows/build.yml)
 [![Version](https://img.shields.io/jetbrains/plugin/v/18787.svg)](https://plugins.jetbrains.com/plugin/18787)
 [![Downloads](https://img.shields.io/jetbrains/plugin/d/18787.svg)](https://plugins.jetbrains.com/plugin/18787)
