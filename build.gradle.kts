@@ -18,10 +18,10 @@ buildscript {
 gradle.startParameter.showStacktrace = ShowStacktrace.ALWAYS
 
 plugins {
-    kotlin("jvm") version "1.6.10"
-    id("me.filippov.gradle.jvm.wrapper") version "0.9.3"
-    id("org.jetbrains.changelog") version "1.3.1"
-    id("org.jetbrains.intellij") version "1.7.0"
+    kotlin("jvm") version "1.8.10"
+    id("me.filippov.gradle.jvm.wrapper") version "0.14.0"
+    id("org.jetbrains.changelog") version "2.0.0"
+    id("org.jetbrains.intellij") version "1.13.0"
 }
 
 group = properties("pluginGroup")
@@ -152,7 +152,7 @@ tasks {
         return@lazy sdkPath.canonicalPath
     }
 
-    val riderModelJar by lazy {
+    @Suppress("UNUSED_VARIABLE") val riderModelJar by lazy {
         val rdLib = setupDependencies.get().idea.get().classes.resolve("lib").resolve("rd")
         assert(rdLib.isDirectory)
         val jarFile = File(rdLib, "rider-model.jar")
