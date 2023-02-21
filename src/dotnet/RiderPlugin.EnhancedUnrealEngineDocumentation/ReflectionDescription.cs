@@ -16,6 +16,7 @@ namespace RiderPlugin.EnhancedUnrealEngineDocumentation
         public string group { get; set; }
         public string subgroup { get; set; }
         public string position { get; set; }
+        public string version { get; set; }
         public string deprecated { get; set; }
         public string type { get; set; }
         public string source { get; set; }
