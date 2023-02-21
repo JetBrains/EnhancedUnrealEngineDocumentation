@@ -9,6 +9,10 @@ The EnhancedUnrealEngineDocumentation plugin adds a convenient way to get improv
 
 ## [Unreleased]
 ### Fixed
+- Hotfix - documentation wasn't bundled in the last build.
+
+## [1.0.5]
+### Fixed
 - Port plugin to 2022.3 SDK
 
 ## [1.0.4]
