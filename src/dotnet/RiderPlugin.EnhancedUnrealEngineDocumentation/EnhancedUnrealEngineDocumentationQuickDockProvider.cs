@@ -22,7 +22,7 @@ public class EnhancedUnrealEngineDocumentationQuickDockProvider : CppQuickDocPro
     {
         var documentationProviderComponent = Shell.Instance.GetComponent<DocumentationProviderComponent>();
         var newItem = item;
-        if (documentationProviderComponent.Documentation.TryGetValue(newItem.Name, out var reflectionDescription))
+        if (documentationProviderComponent.documentation.TryGetValue(newItem.Name, out var reflectionDescription))
         {
             newItem = new CppUE4ReflectionSpecifiers.SimpleItem(item.Name, reflectionDescription.ToHTML());
         }
