@@ -12,7 +12,7 @@ buildscript {
         maven { setUrl("https://cache-redirector.jetbrains.com/repo.maven.apache.org/maven2")}
     }
     dependencies {
-        classpath("com.jetbrains.rd:rd-gen:2023.3.2-preview2")
+        classpath("com.jetbrains.rd:rd-gen:2023.3.1")
     }
 }
 
