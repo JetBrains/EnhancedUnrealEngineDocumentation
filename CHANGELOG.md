@@ -4,7 +4,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0). 
 semantic versioning but uses version numbers based on JetBrains [Rider](https://www.jetbrains.com/rider/) releases.
 The EnhancedUnrealEngineDocumentation plugin adds a convenient way to get improved documentation for Unreal Engine reflection specifiers provided by [BenUI](https://twitter.com/_benui) right in the [Rider IDE](https://www.jetbrains.com/rider/)
 
-## Unreleased
+## [Unreleased]
+
+### Fixed
+- Support 2023.3 IDE's
+
+## [1.0.8]
 
 ### Added
 - Pulling new docs from Ben
@@ -12,7 +17,7 @@ The EnhancedUnrealEngineDocumentation plugin adds a convenient way to get improv
 ### Fixed
 - Support 2023.2 IDE's
 
-## 1.0.7
+## [1.0.7]
 
 ### Added
 - Pulling new docs from Ben

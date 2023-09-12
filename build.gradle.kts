@@ -3,6 +3,7 @@ import org.jetbrains.intellij.tasks.PrepareSandboxTask
 import org.jetbrains.intellij.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.jetbrains.changelog.Changelog
 
 fun properties(key: String) = project.findProperty(key).toString()
 
@@ -11,17 +12,17 @@ buildscript {
         maven { setUrl("https://cache-redirector.jetbrains.com/repo.maven.apache.org/maven2")}
     }
     dependencies {
-        classpath("com.jetbrains.rd:rd-gen:2023.1.2")
+        classpath("com.jetbrains.rd:rd-gen:2023.3.0")
     }
 }
 
 gradle.startParameter.showStacktrace = ShowStacktrace.ALWAYS
 
 plugins {
-    kotlin("jvm") version "1.8.10"
+    kotlin("jvm") version "1.9.10"
     id("me.filippov.gradle.jvm.wrapper") version "0.14.0"
-    id("org.jetbrains.changelog") version "2.0.0"
-    id("org.jetbrains.intellij") version "1.13.0"
+    id("org.jetbrains.changelog") version "2.2.0"
+    id("org.jetbrains.intellij") version "1.15.0" // https://github.com/JetBrains/gradle-intellij-plugin/releases
 }
 
 group = properties("pluginGroup")
@@ -90,7 +91,12 @@ intellij {
 // Configure Gradle Changelog Plugin - read more: https://github.com/JetBrains/gradle-changelog-plugin
 changelog {
     version.set(properties("pluginVersion"))
-    groups.set(emptyList())
+    path.set(file("CHANGELOG.md").canonicalPath)
+    itemPrefix.set("-")
+    keepUnreleasedSection.set(true)
+    unreleasedTerm.set("[Unreleased]")
+    groups.set(listOf("Added", "Changed", "Deprecated", "Removed", "Fixed", "Security"))
+    lineSeparator.set("\n")
 }
 
 tasks {
@@ -129,9 +135,14 @@ tasks {
 
         // Get the latest available change notes from the changelog file
         changeNotes.set(provider {
-            changelog.run {
-                getOrNull(properties("pluginVersion")) ?: getLatest()
-            }.toHTML()
+            changelog.renderItem(
+                    changelog.run{
+                        getOrNull(properties("pluginVersion")) ?: getUnreleased()
+                    }
+                            .withHeader(false)
+                            .withEmptySections(false),
+                    Changelog.OutputType.HTML
+            )
         })
     }
 
