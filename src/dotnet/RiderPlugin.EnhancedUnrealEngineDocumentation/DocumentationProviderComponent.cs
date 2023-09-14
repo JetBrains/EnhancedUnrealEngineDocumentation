@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using JetBrains.Application;
 using JetBrains.Application.Environment;
 using JetBrains.Util;
+using JetBrains.Util.Logging;
 using YamlDotNet.Serialization;
 
 namespace RiderPlugin.EnhancedUnrealEngineDocumentation
@@ -11,6 +13,7 @@ namespace RiderPlugin.EnhancedUnrealEngineDocumentation
     [ShellComponent]
     public class DocumentationProviderComponent
     {
+        private static readonly ILogger OurLogger = Logger.GetLogger(typeof(DocumentationProviderComponent));
         public Dictionary<string, ReflectionDescription> documentation { get; }
         
         public DocumentationProviderComponent(ApplicationPackages applicationPackages,
@@ -25,10 +28,17 @@ namespace RiderPlugin.EnhancedUnrealEngineDocumentation
                 
                 var deserializer = new DeserializerBuilder().Build();
                 using var reader = File.OpenText(enumerateFile.FullPath);
-                var reflectionDescriptions = deserializer.Deserialize<ReflectionDescriptions>(reader);
-                foreach (var reflectionDescriptionsSpecifier in reflectionDescriptions.specifiers)
+                try
                 {
-                    documentation[reflectionDescriptionsSpecifier.name] = reflectionDescriptionsSpecifier;
+                    var reflectionDescriptions = deserializer.Deserialize<ReflectionDescriptions>(reader);
+                    foreach (var reflectionDescriptionsSpecifier in reflectionDescriptions.specifiers)
+                    {
+                        documentation[reflectionDescriptionsSpecifier.name] = reflectionDescriptionsSpecifier;
+                    }
+                }
+                catch (Exception e)
+                {
+                    OurLogger.Error(e, $"[EUED] Failed to parse {enumerateFile.FullPath}");
                 }
             }
         }

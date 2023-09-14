@@ -5,12 +5,16 @@ semantic versioning but uses version numbers based on JetBrains [Rider](https://
 The EnhancedUnrealEngineDocumentation plugin adds a convenient way to get improved documentation for Unreal Engine reflection specifiers provided by [BenUI](https://twitter.com/_benui) right in the [Rider IDE](https://www.jetbrains.com/rider/)
 
 ## [Unreleased]
+### Fixed
+- Crash on reading bundled documentation
+### Added
+- Logging for crash on reading bundled documentation
 
+## [1.0.10]
 ### Fixed
 - Support 2023.3 IDE's
 
 ## [1.0.8]
-
 ### Added
 - Pulling new docs from Ben
 
@@ -18,12 +22,10 @@ The EnhancedUnrealEngineDocumentation plugin adds a convenient way to get improv
 - Support 2023.2 IDE's
 
 ## [1.0.7]
-
 ### Added
 - Pulling new docs from Ben
 
 ## 1.0.6 - 2023-02-22
-
 ### Fixed
 - Hotfix - documentation wasn't bundled in the last build.
 
@@ -32,16 +34,13 @@ The EnhancedUnrealEngineDocumentation plugin adds a convenient way to get improv
 - Port plugin to 2022.3 SDK
 
 ## 1.0.5
-
 ### Fixed
 - Fix missing docs in the plugin
 
 ## 1.0.4
-
 ### Fixed
 - Crash on startup due to reading args.yaml file that doesn't have reflection specifiers
 
 ## 1.0.3
-
 ### Added
 - Initial release
