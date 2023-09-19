@@ -9,8 +9,6 @@ The EnhancedUnrealEngineDocumentation plugin adds a convenient way to get improv
 
 ### Added
 
-- [ISSUE-9](https://github.com/JetBrains/EnhancedUnrealEngineDocumentation/issues/9) Support for meta specifiers in UE reflections
-
 ### Changed
 
 ### Deprecated
@@ -20,6 +18,21 @@ The EnhancedUnrealEngineDocumentation plugin adds a convenient way to get improv
 ### Fixed
 
 ### Security
+
+## 1.0.12 - 2023-09-19
+
+### Added
+
+- [ISSUE-9](https://github.com/JetBrains/EnhancedUnrealEngineDocumentation/issues/9) Support for meta specifiers in UE reflections
+- ### Changed
+
+- ### Deprecated
+
+- ### Removed
+
+- ### Fixed
+
+- ### Security
 
 ## 1.0.11 - 2023-09-14
 
