@@ -13,7 +13,7 @@ using JetBrains.Util.Logging;
 
 namespace RiderPlugin.EnhancedUnrealEngineDocumentation;
 
-[QuickDocProvider(1)]
+[QuickDocProvider(-1)]
 public class EnhancedUnrealEngineDocumentationQuickDockProvider : CppQuickDocProvider
 {
     private static readonly ILogger OurLogger = Logger.GetLogger(typeof(EnhancedUnrealEngineDocumentationQuickDockProvider));
