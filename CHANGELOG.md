@@ -7,13 +7,7 @@ The EnhancedUnrealEngineDocumentation plugin adds a convenient way to get improv
 
 ## [Unreleased]
 
-- Fix EnhancedUnrealEngineDocumentation breaking default C++ quick docs on some systems
-
-## [1.0.12]
-
 ### Added
-
-- [ISSUE-9](https://github.com/JetBrains/EnhancedUnrealEngineDocumentation/issues/9) Support for meta specifiers in UE reflections
 
 ### Changed
 
@@ -24,6 +18,16 @@ The EnhancedUnrealEngineDocumentation plugin adds a convenient way to get improv
 ### Fixed
 
 ### Security
+
+## 1.0.13 - 2023-10-30
+
+- Fix EnhancedUnrealEngineDocumentation breaking default C++ quick docs on some systems
+
+## 1.0.12
+
+### Added
+
+- [ISSUE-9](https://github.com/JetBrains/EnhancedUnrealEngineDocumentation/issues/9) Support for meta specifiers in UE reflections
 
 ## 1.0.11 - 2023-09-14
 
