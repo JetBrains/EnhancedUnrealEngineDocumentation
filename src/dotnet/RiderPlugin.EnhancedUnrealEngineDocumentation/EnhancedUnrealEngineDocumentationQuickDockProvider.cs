@@ -15,7 +15,7 @@ using JetBrains.Util.Logging;
 
 namespace RiderPlugin.EnhancedUnrealEngineDocumentation;
 
-[QuickDocProvider(1)]
+[QuickDocProvider(-1)]
 public class EnhancedUnrealEngineDocumentationQuickDockProvider : CppQuickDocProvider
 {
     private readonly ICppCrefManagerProvider _crefManagerProvider;
