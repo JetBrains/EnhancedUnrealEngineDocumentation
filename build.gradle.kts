@@ -19,10 +19,10 @@ buildscript {
 gradle.startParameter.showStacktrace = ShowStacktrace.ALWAYS
 
 plugins {
-    kotlin("jvm") version "1.9.10"
+    kotlin("jvm") version "1.9.22" // https://plugins.gradle.org/plugin/org.jetbrains.kotlin.jvm
     id("me.filippov.gradle.jvm.wrapper") version "0.14.0"
-    id("org.jetbrains.changelog") version "2.2.0"
-    id("org.jetbrains.intellij") version "1.15.0" // https://github.com/JetBrains/gradle-intellij-plugin/releases
+    id("org.jetbrains.changelog") version "2.2.0" // https://plugins.gradle.org/plugin/org.jetbrains.changelog
+    id("org.jetbrains.intellij") version "1.17.0" // https://plugins.gradle.org/plugin/org.jetbrains.intellij
 }
 
 group = properties("pluginGroup")
