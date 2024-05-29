@@ -1,59 +1,69 @@
+import kotlin.io.path.absolute
+import kotlin.io.path.isDirectory
 import org.apache.tools.ant.taskdefs.condition.Os
-import org.jetbrains.intellij.tasks.PrepareSandboxTask
-import org.jetbrains.intellij.tasks.RunIdeTask
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.changelog.Changelog
+import org.jetbrains.intellij.platform.gradle.Constants
+import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 fun properties(key: String) = project.findProperty(key).toString()
 
-buildscript {
+plugins {
+    id("idea")
+    // Kotlin support
+    kotlin("jvm") version "1.9.24" // https://mvnrepository.com/artifact/org.jetbrains.kotlin.jvm/org.jetbrains.kotlin.jvm.gradle.plugin
+    // Gradle IntelliJ Plugin
+    id("org.jetbrains.intellij.platform") version "2.0.0-beta3" // https://github.com/JetBrains/gradle-intellij-plugin/releases
+    // Gradle Changelog Plugin
+    id("org.jetbrains.changelog") version "2.2.0"
+    // Gradle Qodana Plugin
+    id("org.jetbrains.qodana") version "0.1.13"
+    id("me.filippov.gradle.jvm.wrapper") version "0.14.0"
+}
+
+allprojects {
     repositories {
-        maven { setUrl("https://cache-redirector.jetbrains.com/repo.maven.apache.org/maven2")}
-    }
-    dependencies {
-        classpath("com.jetbrains.rd:rd-gen:2023.3.0")
+        mavenCentral()
     }
 }
 
 gradle.startParameter.showStacktrace = ShowStacktrace.ALWAYS
 
-plugins {
-    kotlin("jvm") version "1.9.22" // https://plugins.gradle.org/plugin/org.jetbrains.kotlin.jvm
-    id("me.filippov.gradle.jvm.wrapper") version "0.14.0"
-    id("org.jetbrains.changelog") version "2.2.0" // https://plugins.gradle.org/plugin/org.jetbrains.changelog
-    id("org.jetbrains.intellij") version "1.17.0" // https://plugins.gradle.org/plugin/org.jetbrains.intellij
-}
-
 group = properties("pluginGroup")
 version = properties("pluginVersion")
 
-apply {
-    plugin("kotlin")
-    plugin("com.jetbrains.rdgen")
-}
-
+// Configure project's dependencies
 repositories {
     mavenCentral()
+
+    intellijPlatform {
+        defaultRepositories()
+        jetbrainsRuntime()
+    }
+}
+
+dependencies {
+    intellijPlatform {
+        rider(properties("platformVersion"))
+        jetbrainsRuntime()
+        instrumentationTools()
+        bundledPlugin("com.jetbrains.rider-cpp")
+    }
 }
 
 kotlin {
-    sourceSets {
-        main {
-            kotlin.srcDir("src/rider/main/kotlin")
-        }
-        test {
-            kotlin.srcDir("src/rider/test/kotlin")
-        }
+    jvmToolchain {
+        languageVersion = JavaLanguageVersion.of(17)
     }
 }
 
 sourceSets {
     main {
+        kotlin.srcDir("src/rider/main")
         resources.srcDir("src/rider/main/resources")
     }
 }
-
 
 val buildConfigurationProp = properties("buildConfiguration")
 
@@ -70,23 +80,20 @@ val hashBaseDir = File(repoRoot, "build/rdgen")
 val csOutputRoot = File(repoRoot, "src/dotnet/RiderPlugin.EnhancedUnrealEngineDocumentation/obj/model")
 val ktOutputRoot = File(repoRoot, "src/rider/main/kotlin/com/jetbrains/rider/model")
 
+val dotNetSdkPath by lazy {
+    val path = intellijPlatform.platformPath.resolve("lib/DotNetSdkForRdPlugins").absolute()
+    if (!path.isDirectory()) error("$path does not exist or not a directory")
+
+    println("Rider SDK path: $path")
+    return@lazy path
+}
+
 fun TaskContainerScope.setupCleanup(task: Task) {
     withType<Delete> {
         delete(task.outputs.files)
     }
 }
 
-// Configure Gradle IntelliJ Plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
-intellij {
-    pluginName.set(properties("pluginName"))
-    version.set(properties("platformVersion"))
-    type.set(properties("platformType"))
-    downloadSources.set(properties("platformDownloadSources").toBoolean())
-    updateSinceUntilBuild.set(true)
-
-    // Plugin Dependencies. Uses `platformPlugins` property from the gradle.properties file.
-    plugins.set(properties("platformPlugins").split(',').map(String::trim).filter(String::isNotEmpty))
-}
 
 // Configure Gradle Changelog Plugin - read more: https://github.com/JetBrains/gradle-changelog-plugin
 changelog {
@@ -116,7 +123,6 @@ tasks {
     }
 
     patchPluginXml {
-        version.set(properties("pluginVersion"))
         sinceBuild.set(properties("pluginSinceBuild"))
         untilBuild.set(properties("pluginUntilBuild"))
 
@@ -155,24 +161,10 @@ tasks {
         channels.set(listOf(properties("pluginVersion").split('-').getOrElse(1) { "default" }.split('.').first()))
     }
 
-    val dotNetSdkPath by lazy {
-        val sdkPath = setupDependencies.get().idea.get().classes.resolve("lib").resolve("DotNetSdkForRdPlugins")
-        assert(sdkPath.isDirectory)
-        println(".NET SDK path: $sdkPath")
 
-        return@lazy sdkPath.canonicalPath
-    }
 
-    @Suppress("UNUSED_VARIABLE") val riderModelJar by lazy {
-        val rdLib = setupDependencies.get().idea.get().classes.resolve("lib").resolve("rd")
-        assert(rdLib.isDirectory)
-        val jarFile = File(rdLib, "rider-model.jar")
-        assert(jarFile.isFile)
-        return@lazy jarFile.canonicalPath
-    }
-
-    withType<RunIdeTask> {
-        maxHeapSize = "4096m"
+    runIde {
+        jvmArgs("-Xmx4096m")
     }
 
     withType<Test> {
@@ -188,7 +180,7 @@ tasks {
         group = "RiderBackend"
         val generatedFile = project.buildDir.resolve("DotNetSdkPath.generated.props")
 
-        inputs.property("dotNetSdkFile", { dotNetSdkPath })
+//        inputs.property("dotNetSdkFile", { dotNetSdkPath })
         outputs.file(generatedFile)
 
         doLast {
@@ -207,7 +199,7 @@ tasks {
         dependsOn(prepareRiderBuildProps)
 
         val generatedFile = project.projectDir.resolve("NuGet.Config")
-        inputs.property("dotNetSdkFile", { dotNetSdkPath })
+//        inputs.property("dotNetSdkFile", { dotNetSdkPath })
         outputs.file(generatedFile)
         doLast {
             val dotNetSdkFile = dotNetSdkPath
@@ -278,12 +270,12 @@ tasks {
             File(outputFolder, "$dotNetPluginId.pdb")
         )
 
-        dllFiles.forEach {
-            from(it) { into("${intellij.pluginName.get()}/dotnet") }
+        from(dllFiles) {
+            into("${rootProject.name}/dotnet")
         }
 
         from(copyDocs.outputs.files.first()) {
-            into("${intellij.pluginName.get()}/documentation")
+            into("${rootProject.name}/documentation")
         }
 
         doLast {
@@ -291,6 +283,24 @@ tasks {
                 if (!file.exists()) throw RuntimeException("File $file does not exist")
             }
         }
+    }
+}
+
+
+val riderModel: Configuration by configurations.creating {
+    isCanBeConsumed = true
+    isCanBeResolved = false
+}
+
+artifacts {
+    add(riderModel.name, provider {
+        intellijPlatform.platformPath.resolve("lib/rd/rider-model.jar").also {
+//            check(it.isFile) {
+//                "rider-model.jar is not found at $riderModel"
+//            }
+        }
+    }) {
+        builtBy(Constants.Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN)
     }
 }
 
