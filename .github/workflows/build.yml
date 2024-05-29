@@ -47,9 +47,6 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "name=$NAME" >> $GITHUB_OUTPUT
           echo "changelog=$CHANGELOG" >> $GITHUB_OUTPUT
-#           echo "::set-output name=pluginVerifierHomeDir::~/.pluginVerifier"
-
-#           ./gradlew listProductsReleases # prepare list of IDEs for Plugin Verifier
 
       - name: Make dotnet.cmd executable
         run: chmod +x ./tools/dotnet.cmd
