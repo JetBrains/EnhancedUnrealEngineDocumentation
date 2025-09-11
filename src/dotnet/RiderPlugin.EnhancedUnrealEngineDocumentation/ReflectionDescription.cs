@@ -12,6 +12,7 @@ namespace RiderPlugin.EnhancedUnrealEngineDocumentation
     }
     public class ReflectionDescription
     {
+        public string category { get; set; }
         public string name { get; set; }
         public string group { get; set; }
         public string subgroup { get; set; }
