@@ -79,7 +79,7 @@ public class EnhancedReflectionQuickDocPresenter : CppUE4SpecifiersQuickDocPrese
         {
             text.Append($"<dt>Related:</dt><ul>");
             text.Append(_documentation.related.Select(it =>
-                    $"<li><dd><a href=\"https://benui.ca/unreal/uproperty/#{it.ToLower()}\">{it}</a></dd></li>")
+                    $"<li><dd><a href=\"https://unreal-garden.com/docs/{_documentation.category}/#{it.ToLower()}\">{it}</a></dd></li>")
                 .Join(""));
             text.Append("</ul>");
             text.Append("<br>");
@@ -88,7 +88,7 @@ public class EnhancedReflectionQuickDocPresenter : CppUE4SpecifiersQuickDocPrese
         {
             text.Append($"<dt>Opposite:</dt><ul>");
             text.Append(_documentation.antonyms.Select(it =>
-                    $"<li><dd><a href=\"https://benui.ca/unreal/uproperty/#{it.ToLower()}\">{it}</a></dd></li>")
+                    $"<li><dd><a href=\"https://unreal-garden.com/docs/{_documentation.category}/#{it.ToLower()}\">{it}</a></dd></li>")
                 .Join(""));
             text.Append("</ul>");
             text.Append("<br>");
@@ -97,7 +97,7 @@ public class EnhancedReflectionQuickDocPresenter : CppUE4SpecifiersQuickDocPrese
         {
             text.Append($"<dt>Incompatible:</dt><ul>");
             text.Append(_documentation.incompatible.Select(it =>
-                    $"<li><dd><a href=\"https://benui.ca/unreal/uproperty/#{it.ToLower()}\">{it}</a></dd></li>")
+                    $"<li><dd><a href=\"https://unreal-garden.com/docs/{_documentation.category}/#{it.ToLower()}\">{it}</a></dd></li>")
                 .Join(""));
             text.Append("</ul>");
             text.Append("<br>");
@@ -106,17 +106,16 @@ public class EnhancedReflectionQuickDocPresenter : CppUE4SpecifiersQuickDocPrese
         {
             text.Append($"<dt>Implies:</dt><ul>");
             text.Append(_documentation.implies.Select(it =>
-                    $"<li><dd><a href=\"https://benui.ca/unreal/uproperty/#{it.ToLower()}\">{it}</a></dd></li>")
+                    $"<li><dd><a href=\"https://unreal-garden.com/docs/{_documentation.category}/#{it.ToLower()}\">{it}</a></dd></li>")
                 .Join(""));
             text.Append("</ul>");
             text.Append("<br>");
         }
         text.Append($"</dl>");
-        
-        text.Append($"<a href=\"https://benui.ca/unreal/uproperty/#{_documentation.name.ToLower()}\">Full Documentation</a><br>");
+        text.Append($"<a href=\"https://unreal-garden.com/docs/{_documentation.category}/#{_documentation.name.ToLower()}\">Full Documentation</a><br>");
         if (_documentation.images != null)
         {
-            text.Append(_documentation.images.Select(it => $"<img src=\"https://benui.ca/{it}\">").Join(""));
+            text.Append(_documentation.images.Select(it => $"<img src=\"https://unreal-garden.com/{it}\">").Join(""));
         }
 
         return new QuickDocTitleAndText(text, _documentation.name.NON_LOCALIZABLE());

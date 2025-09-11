@@ -10,15 +10,11 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 fun properties(key: String) = project.findProperty(key).toString()
 
 plugins {
-    id("idea")
-    // Kotlin support
-    kotlin("jvm") version "1.9.24" // https://mvnrepository.com/artifact/org.jetbrains.kotlin.jvm/org.jetbrains.kotlin.jvm.gradle.plugin
-    // Gradle IntelliJ Plugin
-    id("org.jetbrains.intellij.platform") version "2.0.0-beta3" // https://github.com/JetBrains/gradle-intellij-plugin/releases
-    // Gradle Changelog Plugin
-    id("org.jetbrains.changelog") version "2.2.0"
-    // Gradle Qodana Plugin
-    id("org.jetbrains.qodana") version "0.1.13"
+    id("java") // Java support
+    alias(libs.plugins.kotlin) // Kotlin support
+    alias(libs.plugins.intelliJPlatform) // IntelliJ Platform Gradle Plugin
+    alias(libs.plugins.changelog) // Gradle Changelog Plugin
+    alias(libs.plugins.qodana) // Gradle Qodana Plugin
     id("me.filippov.gradle.jvm.wrapper") version "0.14.0"
 }
 
@@ -45,9 +41,10 @@ repositories {
 
 dependencies {
     intellijPlatform {
-        rider(properties("platformVersion"))
+        rider(properties("platformVersion")) {
+            useInstaller = false
+        }
         jetbrainsRuntime()
-        instrumentationTools()
         bundledPlugin("com.jetbrains.rider-cpp")
     }
 }
@@ -106,15 +103,16 @@ changelog {
     lineSeparator.set("\n")
 }
 
+kotlin {
+    jvmToolchain(properties("javaVersion").toInt())
+}
+
 tasks {
     // Set the JVM compatibility versions
     properties("javaVersion").let {
         withType<JavaCompile> {
             sourceCompatibility = it
             targetCompatibility = it
-        }
-        withType<KotlinCompile> {
-            kotlinOptions.jvmTarget = it
         }
     }
 
@@ -178,7 +176,7 @@ tasks {
 
     val prepareRiderBuildProps by registering {
         group = "RiderBackend"
-        val generatedFile = project.buildDir.resolve("DotNetSdkPath.generated.props")
+        val generatedFile = layout.buildDirectory.file("DotNetSdkPath.generated.props")
 
 //        inputs.property("dotNetSdkFile", { dotNetSdkPath })
         outputs.file(generatedFile)
@@ -220,7 +218,7 @@ tasks {
         }
     }
 
-    val buildResharperHost by registering {
+    val buildResharperHost by registering(Exec::class) {
         group = "RiderBackend"
         description = "Build backend for Rider"
         dependsOn(prepareNuGetConfig)
@@ -229,28 +227,24 @@ tasks {
         inputs.dir(file("$repoRoot/src/dotnet"))
         outputs.dir(file("$repoRoot/src/dotnet/RiderPlugin.EnhancedUnrealEngineDocumentation/bin/RiderPlugin.EnhancedUnrealEngineDocumentation/$buildConfigurationProp"))
 
-        doLast {
-            val warningsAsErrors: String by project.extra
-            val buildArguments = listOf(
-                "build",
-                dotNetSolution.canonicalPath,
-                "-consoleLoggerParameters:ErrorsOnly",
-                "/p:Configuration=$buildConfigurationProp",
-                "/p:Version=${project.version}",
-                "/p:TreatWarningsAsErrors=$warningsAsErrors",
-                "/bl:${dotNetSolution.name}.binlog",
-                "/nologo"
-            )
-            logger.info("call dotnet.cmd with '$buildArguments'")
-            project.exec {
-                executable = file("$rootDir/tools/dotnet.cmd").normalize().canonicalPath
-                args = buildArguments
-                workingDir = dotNetSolution.parentFile
-            }
-        }
+        val warningsAsErrors: String by project.extra
+        val buildArguments = listOf(
+            "build",
+            dotNetSolution.canonicalPath,
+            "-consoleLoggerParameters:ErrorsOnly",
+            "/p:Configuration=$buildConfigurationProp",
+            "/p:Version=${project.version}",
+            "/p:TreatWarningsAsErrors=$warningsAsErrors",
+            "/bl:${dotNetSolution.name}.binlog",
+            "/nologo"
+        )
+        logger.info("call dotnet.cmd with '$buildArguments'")
+        executable = file("$rootDir/tools/dotnet.cmd").normalize().canonicalPath
+        args = buildArguments
+        workingDir = dotNetSolution.parentFile
     }
 
-    val copyDocs by creating(Copy::class) {
+    val copyDocs by registering(Copy::class) {
         from("$repoRoot/documentation")
         into("$repoRoot/build/distributions/documentation")
     }
@@ -274,7 +268,7 @@ tasks {
             into("${rootProject.name}/dotnet")
         }
 
-        from(copyDocs.outputs.files.first()) {
+        from(copyDocs) {
             into("${rootProject.name}/documentation")
         }
 

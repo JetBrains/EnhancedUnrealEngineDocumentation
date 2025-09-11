@@ -33,6 +33,7 @@ namespace RiderPlugin.EnhancedUnrealEngineDocumentation
                     var reflectionDescriptions = deserializer.Deserialize<ReflectionDescriptions>(reader);
                     foreach (var reflectionDescriptionsSpecifier in reflectionDescriptions.specifiers)
                     {
+                        reflectionDescriptionsSpecifier.category = enumerateFile.NameWithoutExtension;
                         documentation[reflectionDescriptionsSpecifier.name] = reflectionDescriptionsSpecifier;
                     }
                 }
