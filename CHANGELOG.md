@@ -10,6 +10,7 @@ The EnhancedUnrealEngineDocumentation plugin adds a convenient way to get improv
 ### Fixed
 
 - Bump 2025.3 IDE support
+- Fix 
 
 ## [1.0.14]
 
