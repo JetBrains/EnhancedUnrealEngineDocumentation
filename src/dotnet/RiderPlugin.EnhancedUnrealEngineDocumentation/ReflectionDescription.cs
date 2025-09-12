@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using JetBrains.Util;
 using YamlDotNet.Serialization;
 
 namespace RiderPlugin.EnhancedUnrealEngineDocumentation
 {
     public class ReflectionDescriptions
     {
+        [DefaultValue("")]
+        public string id { get; set; }
         public List<ReflectionDescription> specifiers { get; set; }
     }
     public class ReflectionDescription
@@ -20,6 +20,7 @@ namespace RiderPlugin.EnhancedUnrealEngineDocumentation
         public string version { get; set; }
         public string deprecated { get; set; }
         public string type { get; set; }
+        public int utility { get; set; }
         public string source { get; set; }
         
         [YamlMember(Alias= "type-comment")]
