@@ -11,6 +11,7 @@ using JetBrains.ReSharper.Psi.Cpp.Presentation;
 using JetBrains.UI.RichText;
 using JetBrains.Util;
 using JetBrains.Util.RichText;
+using YamlDocsParsing;
 
 namespace RiderPlugin.EnhancedUnrealEngineDocumentation;
 

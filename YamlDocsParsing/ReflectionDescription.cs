@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using YamlDotNet.Serialization;
 
-namespace RiderPlugin.EnhancedUnrealEngineDocumentation
+namespace YamlDocsParsing
 {
     public class ReflectionDescriptions
     {
