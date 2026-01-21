@@ -1,11 +1,10 @@
-import kotlin.io.path.absolute
-import kotlin.io.path.isDirectory
-import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask
+import kotlin.io.path.absolute
+import kotlin.io.path.isDirectory
 
 fun properties(key: String) = project.findProperty(key).toString()
 
@@ -65,17 +64,12 @@ sourceSets {
 val buildConfigurationProp = properties("buildConfiguration")
 
 val repoRoot by extra { project.rootDir }
-val isWindows by extra { Os.isFamily(Os.FAMILY_WINDOWS) }
 val idePluginId by extra { "RiderPlugin" }
 val dotNetSolutionId by extra { "EnhancedUnrealEngineDocumentation" }
 val dotNetDir by extra { File(repoRoot, "src/dotnet") }
 val dotNetBinDir by extra { dotNetDir.resolve("$idePluginId.$dotNetSolutionId").resolve("bin") }
 val dotNetPluginId by extra { "$idePluginId.${project.name}" }
 val dotNetSolution by extra { File(repoRoot, "$dotNetSolutionId.sln") }
-val modelDir = File(repoRoot, "protocol/src/main/kotlin/model")
-val hashBaseDir = File(repoRoot, "build/rdgen")
-val csOutputRoot = File(repoRoot, "src/dotnet/RiderPlugin.EnhancedUnrealEngineDocumentation/obj/model")
-val ktOutputRoot = File(repoRoot, "src/rider/main/kotlin/com/jetbrains/rider/model")
 
 val dotNetSdkPath by lazy {
     val path = intellijPlatform.platformPath.resolve("lib/DotNetSdkForRdPlugins").absolute()
@@ -85,10 +79,8 @@ val dotNetSdkPath by lazy {
     return@lazy path
 }
 
-fun TaskContainerScope.setupCleanup(task: Task) {
-    withType<Delete> {
-        delete(task.outputs.files)
-    }
+tasks.withType<RunIdeTask>().configureEach {
+    jvmArgs("-Didea.reset.classpath.from.manifest=true")
 }
 
 
@@ -122,7 +114,6 @@ tasks {
 
     patchPluginXml {
         sinceBuild.set(properties("pluginSinceBuild"))
-        untilBuild.set(properties("pluginUntilBuild"))
 
         // Extract the <!-- Plugin description --> section from README.md and provide for the plugin's manifest
         pluginDescription.set(
@@ -288,11 +279,7 @@ val riderModel: Configuration by configurations.creating {
 
 artifacts {
     add(riderModel.name, provider {
-        intellijPlatform.platformPath.resolve("lib/rd/rider-model.jar").also {
-//            check(it.isFile) {
-//                "rider-model.jar is not found at $riderModel"
-//            }
-        }
+        intellijPlatform.platformPath.resolve("lib/rd/rider-model.jar")
     }) {
         builtBy(Constants.Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN)
     }
