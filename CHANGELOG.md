@@ -9,6 +9,12 @@ The EnhancedUnrealEngineDocumentation plugin adds a convenient way to get improv
 
 ### Fixed
 
+- Fix formatting in doc files that prevented from presenting some docs (e.g. `GetKeyOptions` for `UPROPERTY`)
+
+## [1.0.22]
+
+### Fixed
+
 - Bump 2026.1 IDE support
 
 ## [1.0.14]
