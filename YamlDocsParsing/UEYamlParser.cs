@@ -18,13 +18,13 @@ namespace YamlDocsParsing
             foreach (var enumerateFile in pathToDocumentation.GetChildFiles())
             {
                 if (enumerateFile.NameWithoutExtension.Equals("args")) continue;
+                var fileName = enumerateFile.NameWithoutExtension;
 
                 var parsedDocs = ParseDoc(enumerateFile, throwOnError);
                 foreach (var keyValuePair in parsedDocs)
                 {
-                    // TODO: different reflections macros (UENUM, USTRUCT, etc) can have same keys.
-                    // Needs a way to handle it at parsing side.
-                    documentation[keyValuePair.Key] = keyValuePair.Value;
+                    var key = $"{fileName}_{keyValuePair.Key}";
+                    documentation[key] = keyValuePair.Value;
                 }
             }
             return documentation;

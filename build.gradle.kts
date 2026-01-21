@@ -69,6 +69,7 @@ val dotNetSolutionId by extra { "EnhancedUnrealEngineDocumentation" }
 val dotNetDir by extra { File(repoRoot, "src/dotnet") }
 val dotNetBinDir by extra { dotNetDir.resolve("$idePluginId.$dotNetSolutionId").resolve("bin") }
 val dotNetPluginId by extra { "$idePluginId.${project.name}" }
+val yamlParsingId = "YamlDocsParsing"
 val dotNetSolution by extra { File(repoRoot, "$dotNetSolutionId.sln") }
 
 val dotNetSdkPath by lazy {
@@ -252,7 +253,9 @@ tasks {
 
         val dllFiles = listOf(
             File(outputFolder, "$dotNetPluginId.dll"),
-            File(outputFolder, "$dotNetPluginId.pdb")
+            File(outputFolder, "$dotNetPluginId.pdb"),
+            File(outputFolder, "$yamlParsingId.dll"),
+            File(outputFolder, "$yamlParsingId.pdb")
         )
 
         from(dllFiles) {
