@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.Collections.Generic;
 using System.Reflection;
 using JetBrains.Application;
 using JetBrains.Application.Environment;
 using JetBrains.Util;
 using JetBrains.Util.Logging;
-using YamlDotNet.Serialization;
+using YamlDocsParsing;
 
 namespace RiderPlugin.EnhancedUnrealEngineDocumentation
 {
@@ -19,29 +17,8 @@ namespace RiderPlugin.EnhancedUnrealEngineDocumentation
         public DocumentationProviderComponent(ApplicationPackages applicationPackages,
             IDeployedPackagesExpandLocationResolver resolver)
         {
-            documentation = new Dictionary<string, ReflectionDescription>();
             var pathToDocumentation = GetPathToDocumentationFolder(applicationPackages, resolver);
-            
-            foreach (var enumerateFile in pathToDocumentation.GetChildFiles())
-            {
-                if (enumerateFile.NameWithoutExtension.Equals("args")) continue;
-                
-                var deserializer = new DeserializerBuilder().Build();
-                using var reader = File.OpenText(enumerateFile.FullPath);
-                try
-                {
-                    var reflectionDescriptions = deserializer.Deserialize<ReflectionDescriptions>(reader);
-                    foreach (var reflectionDescriptionsSpecifier in reflectionDescriptions.specifiers)
-                    {
-                        reflectionDescriptionsSpecifier.category = enumerateFile.NameWithoutExtension;
-                        documentation[reflectionDescriptionsSpecifier.name] = reflectionDescriptionsSpecifier;
-                    }
-                }
-                catch (Exception e)
-                {
-                    OurLogger.Error(e, $"[EUED] Failed to parse {enumerateFile.FullPath}");
-                }
-            }
+            documentation = UEYamlParser.ParseDocs(pathToDocumentation.FullPath);
         }
 
         private static FileSystemPath GetPathToDocumentationFolder(ApplicationPackages applicationPackages, IDeployedPackagesExpandLocationResolver resolver)

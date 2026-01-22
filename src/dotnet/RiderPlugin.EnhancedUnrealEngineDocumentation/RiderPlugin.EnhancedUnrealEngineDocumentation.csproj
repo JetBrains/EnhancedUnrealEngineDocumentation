@@ -21,5 +21,9 @@
     <Compile Include=".\obj\model\*\*.cs" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\YamlDocsParsing\YamlDocsParsing.csproj" />
+  </ItemGroup>
+
   <Import Project="$(DotNetSdkPath)\Build\SubplatformReference.ReSharperCpp_RiderPlugin.Props" />
 </Project>
