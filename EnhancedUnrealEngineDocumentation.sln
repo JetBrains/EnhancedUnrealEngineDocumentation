@@ -15,7 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "misc", "misc", "{4A9ABB95-3
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CheckYamlParsing", "src\dotnet\CheckYamlParsing\CheckYamlParsing.csproj", "{2E838C78-6128-4EB4-A08F-C6FA0FF59262}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDocsParsing", "YamlDocsParsing\YamlDocsParsing.csproj", "{E8BA39A1-AD4A-44EF-8D05-6DD6F716750E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlDocsParsing", "src\dotnet\YamlDocsParsing\YamlDocsParsing.csproj", "{E8BA39A1-AD4A-44EF-8D05-6DD6F716750E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

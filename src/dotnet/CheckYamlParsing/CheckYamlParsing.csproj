@@ -6,7 +6,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\..\YamlDocsParsing\YamlDocsParsing.csproj" />
+      <ProjectReference Include="..\YamlDocsParsing\YamlDocsParsing.csproj" />
     </ItemGroup>
-
 </Project>

@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\YamlDocsParsing\YamlDocsParsing.csproj" />
+    <ProjectReference Include="..\YamlDocsParsing\YamlDocsParsing.csproj" />
   </ItemGroup>
 
   <Import Project="$(DotNetSdkPath)\Build\SubplatformReference.ReSharperCpp_RiderPlugin.Props" />
