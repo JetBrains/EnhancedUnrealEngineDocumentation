@@ -272,6 +272,10 @@ tasks {
             }
         }
     }
+
+    buildSearchableOptions {
+        enabled = false
+    }
 }
 
 
