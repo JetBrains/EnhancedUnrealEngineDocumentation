@@ -1,4 +1,4 @@
-<idea-plugin allow-bundled-update="true">
+<idea-plugin allow-bundled-update="true" require-restart="true">
   <id>EnhancedUnrealEngineDocumentation</id>
   <name>EnhancedUnrealEngineDocumentation</name>
   <version>_PLACEHOLDER_</version>
