@@ -9,6 +9,12 @@ The EnhancedUnrealEngineDocumentation plugin adds a convenient way to get improv
 
 ### Fixed
 
+- Fix a bug introduced in the previous release, when Quick Doc was presenting only for a symbol under caret, ignoring mouse position
+
+## [1.0.23]
+
+### Fixed
+
 - Fix formatting in doc files that prevented from presenting some docs (e.g. `GetKeyOptions` for `UPROPERTY`)
 
 ## [1.0.22]
