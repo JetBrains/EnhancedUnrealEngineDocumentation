@@ -7,37 +7,7 @@ The EnhancedUnrealEngineDocumentation plugin adds a convenient way to get improv
 
 ## [Unreleased]
 
-### Fixed
-
-- Fix a bug introduced in the previous release, when Quick Doc was presenting only for a symbol under caret, ignoring mouse position
-
-## [1.0.23]
-
-### Fixed
-
-- Fix formatting in doc files that prevented from presenting some docs (e.g. `GetKeyOptions` for `UPROPERTY`)
-
-## [1.0.22]
-
-### Fixed
-
-- Bump 2026.1 IDE support
-
-## [1.0.14]
-
-### Fixed
-
-- Bump 2024.1 IDE support
-
-## [1.0.13]
-
-- Fix EnhancedUnrealEngineDocumentation breaking default C++ quick docs on some systems
-
-## [1.0.12]
-
 ### Added
-
-- [ISSUE-9](https://github.com/JetBrains/EnhancedUnrealEngineDocumentation/issues/9) Support for meta specifiers in UE reflections
 
 ### Changed
 
@@ -48,6 +18,40 @@ The EnhancedUnrealEngineDocumentation plugin adds a convenient way to get improv
 ### Fixed
 
 ### Security
+
+## 1.0.24 - 2026-01-29
+
+### Fixed
+
+- Fix a bug introduced in the previous release, when Quick Doc was presenting only for a symbol under caret, ignoring mouse position
+
+## 1.0.23
+
+### Fixed
+
+- Fix formatting in doc files that prevented from presenting some docs (e.g. `GetKeyOptions` for `UPROPERTY`)
+
+## 1.0.22
+
+### Fixed
+
+- Bump 2026.1 IDE support
+
+## 1.0.14
+
+### Fixed
+
+- Bump 2024.1 IDE support
+
+## 1.0.13
+
+- Fix EnhancedUnrealEngineDocumentation breaking default C++ quick docs on some systems
+
+## 1.0.12
+
+### Added
+
+- [ISSUE-9](https://github.com/JetBrains/EnhancedUnrealEngineDocumentation/issues/9) Support for meta specifiers in UE reflections
 
 ## 1.0.11 - 2023-09-14
 
