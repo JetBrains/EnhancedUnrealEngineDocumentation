@@ -100,6 +100,10 @@ kotlin {
     jvmToolchain(properties("javaVersion").toInt())
 }
 
+tasks.named("buildSearchableOptions").configure {
+    enabled = false
+}
+
 tasks {
     // Set the JVM compatibility versions
     properties("javaVersion").let {
