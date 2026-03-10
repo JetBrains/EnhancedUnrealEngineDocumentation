@@ -2,6 +2,7 @@
 using System.Reflection;
 using JetBrains.Application;
 using JetBrains.Application.Environment;
+using JetBrains.Application.Environment.DeployedPackages;
 using JetBrains.Util;
 using JetBrains.Util.Logging;
 using YamlDocsParsing;
