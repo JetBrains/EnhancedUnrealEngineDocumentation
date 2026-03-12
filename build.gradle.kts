@@ -266,7 +266,30 @@ tasks {
         workingDir = dotNetSolution.parentFile
     }
 
+    val validateDocumentationPresented by registering {
+        description = "Validates that the documentation directory is not empty (submodule is initialized)"
+
+        doLast {
+            val docsDir = file("$repoRoot/documentation")
+            if (!docsDir.exists() || !docsDir.isDirectory) {
+                throw RuntimeException(
+                    "Documentation directory not found: ${docsDir}\n" +
+                    "Make sure the documentation git submodule is initialized: git submodule update --init"
+                )
+            }
+            val yamlFiles = fileTree(docsDir) { include("**/*.yaml", "**/*.yml") }.files
+            if (yamlFiles.isEmpty()) {
+                throw RuntimeException(
+                    "Documentation directory contains no YAML files: ${docsDir}\n" +
+                    "Make sure the documentation git submodule is initialized: git submodule update --init"
+                )
+            }
+            println("Documentation validation passed: found ${yamlFiles.size} YAML file(s)")
+        }
+    }
+
     val copyDocs by registering(Copy::class) {
+        dependsOn(validateDocumentationPresented)
         from("$repoRoot/documentation")
         into("$repoRoot/build/distributions/documentation")
     }
