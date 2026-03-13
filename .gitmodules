@@ -1,4 +1,4 @@
 [submodule "documentation"]
 	path = documentation
-	url = https://github.com/benui-dev/UE-Specifier-Docs
+	url = https://github.com/decoyrs/UE-Specifier-Docs
 	branch = main
