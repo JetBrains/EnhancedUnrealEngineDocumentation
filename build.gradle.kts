@@ -10,18 +10,11 @@ import kotlin.io.path.isDirectory
 fun properties(key: String) = project.findProperty(key).toString()
 
 plugins {
-    id("java") // Java support
-    alias(libs.plugins.kotlin) // Kotlin support
-    alias(libs.plugins.intelliJPlatform) // IntelliJ Platform Gradle Plugin
-    alias(libs.plugins.changelog) // Gradle Changelog Plugin
-    alias(libs.plugins.qodana) // Gradle Qodana Plugin
-    id("me.filippov.gradle.jvm.wrapper") version "0.14.0"
-}
-
-allprojects {
-    repositories {
-        mavenCentral()
-    }
+    id("java")
+    alias(libs.plugins.kotlin)
+    alias(libs.plugins.intelliJPlatform)
+    alias(libs.plugins.changelog)
+    id("me.filippov.gradle.jvm.wrapper") version "0.16.0"
 }
 
 gradle.startParameter.showStacktrace = ShowStacktrace.ALWAYS
@@ -29,7 +22,6 @@ gradle.startParameter.showStacktrace = ShowStacktrace.ALWAYS
 group = properties("pluginGroup")
 version = properties("pluginVersion")
 
-// Configure project's dependencies
 repositories {
     mavenCentral()
 
@@ -49,10 +41,12 @@ dependencies {
     }
 }
 
+intellijPlatform {
+    buildSearchableOptions = false
+}
+
 kotlin {
-    jvmToolchain {
-        languageVersion = JavaLanguageVersion.of(17)
-    }
+    jvmToolchain(properties("javaVersion").toInt())
 }
 
 sourceSets {
@@ -64,20 +58,20 @@ sourceSets {
 
 val buildConfigurationProp = properties("buildConfiguration")
 
-val repoRoot by extra { project.rootDir }
-val idePluginId by extra { "RiderPlugin" }
-val dotNetSolutionId by extra { "EnhancedUnrealEngineDocumentation" }
-val dotNetDir by extra { File(repoRoot, "src/dotnet") }
-val dotNetBinDir by extra { dotNetDir.resolve("$idePluginId.$dotNetSolutionId").resolve("bin") }
-val dotNetPluginId by extra { "$idePluginId.${project.name}" }
+val repoRoot = project.rootDir
+val idePluginId = "RiderPlugin"
+val dotNetSolutionId = "EnhancedUnrealEngineDocumentation"
+val dotNetDir = File(repoRoot, "src/dotnet")
+val dotNetBinDir = dotNetDir.resolve("$idePluginId.$dotNetSolutionId").resolve("bin")
+val dotNetPluginId = "$idePluginId.${project.name}"
 val yamlParsingId = "YamlDocsParsing"
-val dotNetSolution by extra { File(repoRoot, "$dotNetSolutionId.sln") }
+val dotNetSolution = File(repoRoot, "$dotNetSolutionId.sln")
 
 val dotNetSdkPath by lazy {
     val path = intellijPlatform.platformPath.resolve("lib/DotNetSdkForRdPlugins").absolute()
     if (!path.isDirectory()) error("$path does not exist or not a directory")
 
-    println("Rider SDK path: $path")
+    logger.lifecycle("Rider SDK path: $path")
     return@lazy path
 }
 
@@ -107,36 +101,20 @@ val jarFilesToSign = buildList {
     }
 }
 
-tasks.withType<RunIdeTask>().configureEach {
-    jvmArgs("-Didea.reset.classpath.from.manifest=true")
-}
-
 // Configure Gradle Changelog Plugin - read more: https://github.com/JetBrains/gradle-changelog-plugin
 changelog {
-    version.set(properties("pluginVersion"))
-    path.set(file("CHANGELOG.md").canonicalPath)
-    itemPrefix.set("-")
-    keepUnreleasedSection.set(true)
-    unreleasedTerm.set("[Unreleased]")
-    groups.set(listOf("Added", "Changed", "Deprecated", "Removed", "Fixed", "Security"))
-    lineSeparator.set("\n")
-}
-
-kotlin {
-    jvmToolchain(properties("javaVersion").toInt())
-}
-
-tasks.named("buildSearchableOptions").configure {
-    enabled = false
+    version = properties("pluginVersion")
+    path = file("CHANGELOG.md").canonicalPath
+    itemPrefix = "-"
+    keepUnreleasedSection = true
+    unreleasedTerm = "[Unreleased]"
+    groups = listOf("Added", "Changed", "Deprecated", "Removed", "Fixed", "Security")
+    lineSeparator = "\n"
 }
 
 tasks {
-    // Set the JVM compatibility versions
-    properties("javaVersion").let {
-        withType<JavaCompile> {
-            sourceCompatibility = it
-            targetCompatibility = it
-        }
+    withType<RunIdeTask>().configureEach {
+        jvmArgs("-Didea.reset.classpath.from.manifest=true")
     }
 
     wrapper {
@@ -144,44 +122,40 @@ tasks {
     }
 
     patchPluginXml {
-        sinceBuild.set(properties("pluginSinceBuild"))
+        sinceBuild = properties("pluginSinceBuild")
 
         // Extract the <!-- Plugin description --> section from README.md and provide for the plugin's manifest
-        pluginDescription.set(
-                projectDir.resolve("README.md").readText().lines().run {
-                    val start = "<!-- Plugin description -->"
-                    val end = "<!-- Plugin description end -->"
+        pluginDescription = projectDir.resolve("README.md").readText().lines().run {
+            val start = "<!-- Plugin description -->"
+            val end = "<!-- Plugin description end -->"
 
-                    if (!containsAll(listOf(start, end))) {
-                        throw GradleException("Plugin description section not found in README.md:\n$start ... $end")
-                    }
-                    subList(indexOf(start) + 1, indexOf(end))
-                }.joinToString("\n").run { org.jetbrains.changelog.markdownToHTML(this) }
-        )
+            if (!containsAll(listOf(start, end))) {
+                throw GradleException("Plugin description section not found in README.md:\n$start ... $end")
+            }
+            subList(indexOf(start) + 1, indexOf(end))
+        }.joinToString("\n").run { org.jetbrains.changelog.markdownToHTML(this) }
 
         // Get the latest available change notes from the changelog file
-        changeNotes.set(provider {
+        changeNotes = provider {
             changelog.renderItem(
-                    changelog.run{
-                        getOrNull(properties("pluginVersion")) ?: getUnreleased()
-                    }
-                            .withHeader(false)
-                            .withEmptySections(false),
-                    Changelog.OutputType.HTML
+                changelog.run {
+                    getOrNull(properties("pluginVersion")) ?: getUnreleased()
+                }
+                    .withHeader(false)
+                    .withEmptySections(false),
+                Changelog.OutputType.HTML
             )
-        })
+        }
     }
 
     publishPlugin {
         dependsOn("patchChangelog")
-        token.set(System.getenv("PUBLISH_TOKEN"))
+        token = System.getenv("PUBLISH_TOKEN")
         // pluginVersion is based on the SemVer (https://semver.org) and supports pre-release labels, like 2.1.7-alpha.3
         // Specify pre-release label to publish the plugin in a custom Release Channel automatically. Read more:
         // https://plugins.jetbrains.com/docs/intellij/deployment.html#specifying-a-release-channel
-        channels.set(listOf(properties("pluginVersion").split('-').getOrElse(1) { "default" }.split('.').first()))
+        channels = listOf(properties("pluginVersion").split('-').getOrElse(1) { "default" }.split('.').first())
     }
-
-
 
     runIde {
         jvmArgs("-Xmx4096m")
@@ -196,11 +170,11 @@ tasks {
         }
     }
 
-    val prepareRiderBuildProps by registering {
+    val prepareRiderBuildProps = register("prepareRiderBuildProps") {
         group = "RiderBackend"
+        description = "Generates DotNetSdkPath.props for the .NET build"
         val generatedFile = layout.buildDirectory.file("DotNetSdkPath.generated.props")
 
-//        inputs.property("dotNetSdkFile", { dotNetSdkPath })
         outputs.file(generatedFile)
 
         doLast {
@@ -214,12 +188,12 @@ tasks {
         }
     }
 
-    val prepareNuGetConfig by registering {
+    val prepareNuGetConfig = register("prepareNuGetConfig") {
         group = "RiderBackend"
+        description = "Generates NuGet.Config pointing to the Rider SDK packages"
         dependsOn(prepareRiderBuildProps)
 
         val generatedFile = project.projectDir.resolve("NuGet.Config")
-//        inputs.property("dotNetSdkFile", { dotNetSdkPath })
         outputs.file(generatedFile)
         doLast {
             val dotNetSdkFile = dotNetSdkPath
@@ -240,7 +214,7 @@ tasks {
         }
     }
 
-    val buildResharperHost by registering(Exec::class) {
+    val buildResharperHost = register<Exec>("buildResharperHost") {
         group = "RiderBackend"
         description = "Build backend for Rider"
         dependsOn(prepareNuGetConfig)
@@ -249,7 +223,7 @@ tasks {
         inputs.dir(file("$repoRoot/src/dotnet"))
         outputs.dir(file("$repoRoot/src/dotnet/RiderPlugin.EnhancedUnrealEngineDocumentation/bin/RiderPlugin.EnhancedUnrealEngineDocumentation/$buildConfigurationProp"))
 
-        val warningsAsErrors: String by project.extra
+        val warningsAsErrors = properties("warningsAsErrors")
         val buildArguments = listOf(
             "build",
             dotNetSolution.canonicalPath,
@@ -266,7 +240,7 @@ tasks {
         workingDir = dotNetSolution.parentFile
     }
 
-    val validateDocumentationPresented by registering {
+    val validateDocumentationPresented = register("validateDocumentationPresented") {
         description = "Validates that the documentation directory is not empty (submodule is initialized)"
 
         doLast {
@@ -284,11 +258,12 @@ tasks {
                     "Make sure the documentation git submodule is initialized: git submodule update --init"
                 )
             }
-            println("Documentation validation passed: found ${yamlFiles.size} YAML file(s)")
+            logger.lifecycle("Documentation validation passed: found ${yamlFiles.size} YAML file(s)")
         }
     }
 
-    val copyDocs by registering(Copy::class) {
+    val copyDocs = register<Copy>("copyDocs") {
+        description = "Copies documentation files into the build output directory"
         dependsOn(validateDocumentationPresented)
         from("$repoRoot/documentation")
         into("$repoRoot/build/distributions/documentation")
@@ -325,7 +300,7 @@ tasks {
     // ========= Two-Phase Build for Signing Support ================
 
     // Preparation for plugin internals signing. Build all JARs and put them into ${pluginStagingDir}
-    val preparePluginInternalsForSigning by registering(Sync::class) {
+    val preparePluginInternalsForSigning = register<Sync>("preparePluginInternalsForSigning") {
         description = "Prepares plugin files for signing and generates signing manifest"
         group = "build"
 
@@ -367,15 +342,15 @@ tasks {
             signingManifestFile.writeText(filesToSign.joinToString("\n"))
 
             // Summary
-            println("Plugin prepared for signing: ${pluginStagingDir}")
-            println("Signing manifest: ${signingManifestFile}")
-            println("Files to sign: ${filesToSign.size}")
-            filesToSign.forEach { println("  - $it") }
+            logger.lifecycle("Plugin prepared for signing: $pluginStagingDir")
+            logger.lifecycle("Signing manifest: $signingManifestFile")
+            logger.info("Files to sign: ${filesToSign.size}")
+            filesToSign.forEach { logger.info("  - $it") }
         }
     }
 
     // Validates that ${pluginStagingDir} has all required files to assemble the plugin
-    val validatePluginStaging by registering {
+    val validatePluginStaging = register("validatePluginStaging") {
         description = "Validates that plugin staging directory exists and contains required files"
         group = "build"
 
@@ -395,21 +370,21 @@ tasks {
             // Validate expected .NET output files exist
             dotNetOutputFiles.forEach { fileName ->
                 val file = pluginStagingContentDir.resolve("dotnet/${fileName}")
-                if (!file.exists()) throw RuntimeException("Expected .NET file not found: ${file}")
+                if (!file.exists()) throw RuntimeException("Expected .NET file not found: $file")
             }
 
             // Validate expected JAR files exist
             jarFilesToSign.forEach { jarName ->
                 val file = pluginStagingContentDir.resolve("lib/${jarName}")
-                if (!file.exists()) throw RuntimeException("Expected JAR file not found: ${file}")
+                if (!file.exists()) throw RuntimeException("Expected JAR file not found: $file")
             }
         }
     }
 
     // Assembles the final zip-archive from staged (potentially externally signed) files.
     // Produces a ZIP with "-from-staging" suffix by default (override with -PoutputPluginFileSuffix=<value>)
-    // Can be used in pipeline: preparePluginInternalsForSigning -> external sign -> assemblePlugin
-    val assemblePlugin by registering(Zip::class) {
+    // Can be used in a pipeline: preparePluginInternalsForSigning -> external sign -> assemblePlugin
+    register<Zip>("assemblePlugin") {
         description = "Assembles the plugin ZIP from staged files with '-from-staging' classifier"
         group = "build"
 
@@ -420,8 +395,8 @@ tasks {
         exclude("files-to-sign.txt")
 
         archiveBaseName.convention(intellijPlatform.projectName)
-        archiveClassifier.set(providers.gradleProperty("outputPluginFileSuffix").orElse("from-staging"))
-        destinationDirectory.set(layout.buildDirectory.dir("distributions"))
+        archiveClassifier = providers.gradleProperty("outputPluginFileSuffix").orElse("from-staging")
+        destinationDirectory = layout.buildDirectory.dir("distributions")
     }
 
     // ==============================================================
@@ -437,7 +412,7 @@ tasks {
 
         doLast {
             // Verify the archive matches the staging directory to be sure that
-            // buildPlugin and preparePluginInternalsForSigning+assemblePlugin produces the same results
+            // buildPlugin and preparePluginInternalsForSigning+assemblePlugin produce the same results
             val zipFiles = ZipFile(archiveFile.get().asFile).use {
                 it.entries().asSequence().filterNot { e -> e.isDirectory }.map { e -> e.name }.sorted().toList()
             }
@@ -455,7 +430,7 @@ tasks {
 }
 
 
-val riderModel: Configuration by configurations.creating {
+val riderModel: Configuration = configurations.create("riderModel") {
     isCanBeConsumed = true
     isCanBeResolved = false
 }
@@ -467,4 +442,3 @@ artifacts {
         builtBy(Constants.Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN)
     }
 }
-
