@@ -36,18 +36,17 @@ public class EnhancedReflectionQuickDocPresenter : CppUE4SpecifiersQuickDocPrese
 
     public override QuickDocTitleAndText GetHtml(PsiLanguageType presentationLanguage)
     {
-        var doc = RichTextFromSimpleMarkdown.Convert(_documentation.documentation.text);
+        var doc = RichTextFromSimpleMarkdown.Convert(_documentation.documentation?.text ?? string.Empty);
 
         var formattedTitle = FormatTitle(_documentation.name);
         var text = XmlDocHtmlUtil.BuildHtml(
             (_, output) => output.Append(formattedTitle).Append("<br><br>", TextStyle.Default).Append(doc),
-            XmlDocHtmlUtil.NavigationStyle.None, _theming).Append("<br><br>");
+            XmlDocHtmlUtil.NavigationStyle.None, _theming);
 
         if (_documentation.comment != null)
         {
             var comment = RichTextFromSimpleMarkdown.Convert(_documentation.comment);
             text.Append("<blockquote><p>").Append(comment).Append("</p></blockquote>");
-            text.Append("<br>");
         }
         if (_documentation.position.IsNotEmpty() && _documentation.type.IsNotEmpty())
         {
@@ -64,60 +63,57 @@ public class EnhancedReflectionQuickDocPresenter : CppUE4SpecifiersQuickDocPrese
                 _ => ""
             };
 
-            text.Append($"<p><code>{prefix}{body}{suffix}</code</p>").Append("<br>");
-            
+            text.Append($"<p><code>{prefix}{body}{suffix}</code></p>");
         }
         if (_documentation.samples is { Capacity: > 0 })
         {
-           text.Append($"<h4>Samples:</h4>" +
-                       _documentation.samples.Select(it => $"<pre>{it}</pre><hr/>").Join(""));
-           text.Append("<br>");
+            text.Append("<h4>Samples:</h4>");
+            text.Append(_documentation.samples.Select(it => $"<pre>{it}</pre>").Join(""));
+        }
+        if (_documentation.images != null)
+        {
+            text.Append("<table width=\"550\"><tr><td>");
+            text.Append(_documentation.images.Select(it => $"<img src=\"https://unreal-garden.com/{it}\">").Join(""));
+            text.Append("</td></tr></table>");
         }
 
+        text.Append("<table width=\"550\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\"><tr><td></td></tr></table>");
         text.Append("<dl>");
-        
+
         if (_documentation.related is { Capacity: > 0 })
         {
-            text.Append($"<dt>Related:</dt><ul>");
+            text.Append("<dt>Related:</dt><ul>");
             text.Append(_documentation.related.Select(it =>
                     $"<li><dd><a href=\"https://unreal-garden.com/docs/{_documentation.category}/#{it.ToLower()}\">{it}</a></dd></li>")
                 .Join(""));
             text.Append("</ul>");
-            text.Append("<br>");
         }
         if (_documentation.antonyms is { Capacity: > 0 })
         {
-            text.Append($"<dt>Opposite:</dt><ul>");
+            text.Append("<dt>Opposite:</dt><ul>");
             text.Append(_documentation.antonyms.Select(it =>
                     $"<li><dd><a href=\"https://unreal-garden.com/docs/{_documentation.category}/#{it.ToLower()}\">{it}</a></dd></li>")
                 .Join(""));
             text.Append("</ul>");
-            text.Append("<br>");
         }
         if (_documentation.incompatible is { Capacity: > 0 })
         {
-            text.Append($"<dt>Incompatible:</dt><ul>");
+            text.Append("<dt>Incompatible:</dt><ul>");
             text.Append(_documentation.incompatible.Select(it =>
                     $"<li><dd><a href=\"https://unreal-garden.com/docs/{_documentation.category}/#{it.ToLower()}\">{it}</a></dd></li>")
                 .Join(""));
             text.Append("</ul>");
-            text.Append("<br>");
         }
         if (_documentation.implies is { Capacity: > 0 })
         {
-            text.Append($"<dt>Implies:</dt><ul>");
+            text.Append("<dt>Implies:</dt><ul>");
             text.Append(_documentation.implies.Select(it =>
                     $"<li><dd><a href=\"https://unreal-garden.com/docs/{_documentation.category}/#{it.ToLower()}\">{it}</a></dd></li>")
                 .Join(""));
             text.Append("</ul>");
-            text.Append("<br>");
         }
-        text.Append($"</dl>");
-        text.Append($"<a href=\"https://unreal-garden.com/docs/{_documentation.category}/#{_documentation.name.ToLower()}\">Full Documentation</a><br>");
-        if (_documentation.images != null)
-        {
-            text.Append(_documentation.images.Select(it => $"<img src=\"https://unreal-garden.com/{it}\">").Join(""));
-        }
+        text.Append("</dl>");
+        text.Append($"<a href=\"https://unreal-garden.com/docs/{_documentation.category}/#{_documentation.name.ToLower()}\">Full Documentation</a>");
 
         return new QuickDocTitleAndText(text, _documentation.name.NON_LOCALIZABLE());
     }
