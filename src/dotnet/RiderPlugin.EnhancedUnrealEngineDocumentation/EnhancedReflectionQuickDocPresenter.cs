@@ -37,84 +37,91 @@ public class EnhancedReflectionQuickDocPresenter : CppUE4SpecifiersQuickDocPrese
     public override QuickDocTitleAndText GetHtml(PsiLanguageType presentationLanguage)
     {
         var doc = RichTextFromSimpleMarkdown.Convert(_documentation.documentation?.text ?? string.Empty);
-
         var formattedTitle = FormatTitle(_documentation.name);
+        var d = _documentation;
+
         var text = XmlDocHtmlUtil.BuildHtml(
             (_, output) => output.Append(formattedTitle).Append("<br><br>", TextStyle.Default).Append(doc),
             XmlDocHtmlUtil.NavigationStyle.None, _theming);
 
-        if (_documentation.comment != null)
+        // Everything below is appended after BuildHtml so IntelliJ renders h4/pre with native pill/box styling
+        if (d.comment != null)
         {
-            var comment = RichTextFromSimpleMarkdown.Convert(_documentation.comment);
+            var comment = RichTextFromSimpleMarkdown.Convert(d.comment);
             text.Append("<blockquote><p>").Append(comment).Append("</p></blockquote>");
         }
-        if (_documentation.position.IsNotEmpty() && _documentation.type.IsNotEmpty())
+
+        AppendInlineLinks(text, "Related:",      d.related,      d.category);
+        AppendInlineLinks(text, "Opposite:",     d.antonyms,     d.category);
+        AppendInlineLinks(text, "Incompatible:", d.incompatible, d.category);
+        AppendInlineLinks(text, "Implies:",      d.implies,      d.category);
+
+        text.Append($"<br><a href=\"https://unreal-garden.com/docs/{d.category}/#{d.name.ToLower()}\">Full Documentation</a>");
+
+        if (d.position.IsNotEmpty() && d.type.IsNotEmpty())
         {
             var attribute = "UPROPERTY";
-            var prefix = _documentation.position == "main" ? $"{attribute}(" : $"{attribute}(meta=(";
-            var suffix = _documentation.position == "main" ? ")" : "))";
-
-            var body = _documentation.type switch
+            var prefix = d.position == "main" ? $"{attribute}(" : $"{attribute}(meta=(";
+            var suffix = d.position == "main" ? ")" : "))";
+            var body = d.type switch
             {
-                "flag" => $"{_documentation.name}",
-                "bool" => $"{_documentation.name}=true",
-                "string" => $"{_documentation.name}=\"abc\"",
-                "number" or "integer" => $"{_documentation.name}=123",
-                _ => ""
+                "flag"                => d.name,
+                "bool"                => $"{d.name}=true",
+                "string"              => $"{d.name}=\"abc\"",
+                "number" or "integer" => $"{d.name}=123",
+                _                     => ""
             };
+            text.Append($"<dl class=\"headers\"><dt><code>{prefix}{body}{suffix}</code></dt></dl>");
+        }
 
-            text.Append($"<p><code>{prefix}{body}{suffix}</code></p>");
-        }
-        if (_documentation.samples is { Capacity: > 0 })
+        if (d.samples is { Capacity: > 0 })
         {
-            text.Append("<h4>Samples:</h4>");
-            text.Append(_documentation.samples.Select(it => $"<pre>{it}</pre>").Join(""));
+            text.Append("<p><code>Example:</code></p>");
+            foreach (var sample in d.samples)
+                text.Append($"<div class=\"code-block\"><pre>{AppendSyntaxColored(sample.TrimEnd())}</pre></div>");
         }
-        if (_documentation.images != null)
+
+        if (d.images != null)
         {
             text.Append("<table width=\"550\"><tr><td>");
-            text.Append(_documentation.images.Select(it => $"<img src=\"https://unreal-garden.com/{it}\">").Join(""));
+            text.Append(d.images.Select(it => $"<img src=\"https://unreal-garden.com/{it}\">").Join(""));
             text.Append("</td></tr></table>");
         }
 
-        text.Append("<table width=\"550\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\"><tr><td></td></tr></table>");
-        text.Append("<dl>");
-
-        if (_documentation.related is { Capacity: > 0 })
-        {
-            text.Append("<dt>Related:</dt><ul>");
-            text.Append(_documentation.related.Select(it =>
-                    $"<li><dd><a href=\"https://unreal-garden.com/docs/{_documentation.category}/#{it.ToLower()}\">{it}</a></dd></li>")
-                .Join(""));
-            text.Append("</ul>");
-        }
-        if (_documentation.antonyms is { Capacity: > 0 })
-        {
-            text.Append("<dt>Opposite:</dt><ul>");
-            text.Append(_documentation.antonyms.Select(it =>
-                    $"<li><dd><a href=\"https://unreal-garden.com/docs/{_documentation.category}/#{it.ToLower()}\">{it}</a></dd></li>")
-                .Join(""));
-            text.Append("</ul>");
-        }
-        if (_documentation.incompatible is { Capacity: > 0 })
-        {
-            text.Append("<dt>Incompatible:</dt><ul>");
-            text.Append(_documentation.incompatible.Select(it =>
-                    $"<li><dd><a href=\"https://unreal-garden.com/docs/{_documentation.category}/#{it.ToLower()}\">{it}</a></dd></li>")
-                .Join(""));
-            text.Append("</ul>");
-        }
-        if (_documentation.implies is { Capacity: > 0 })
-        {
-            text.Append("<dt>Implies:</dt><ul>");
-            text.Append(_documentation.implies.Select(it =>
-                    $"<li><dd><a href=\"https://unreal-garden.com/docs/{_documentation.category}/#{it.ToLower()}\">{it}</a></dd></li>")
-                .Join(""));
-            text.Append("</ul>");
-        }
-        text.Append("</dl>");
-        text.Append($"<a href=\"https://unreal-garden.com/docs/{_documentation.category}/#{_documentation.name.ToLower()}\">Full Documentation</a>");
-
         return new QuickDocTitleAndText(text, _documentation.name.NON_LOCALIZABLE());
+    }
+
+    private static void AppendInlineLinks(RichText output, string label, System.Collections.Generic.List<string> items, string category)
+    {
+        if (items is not { Count: > 0 }) return;
+        output.Append($"{label} ");
+        output.Append(items.Select(it =>
+            $"<a href=\"https://unreal-garden.com/docs/{category}/#{it.ToLower()}\">{it}</a>").Join(", "));
+        output.Append("<br>");
+    }
+
+    private static readonly System.Text.RegularExpressions.Regex KeywordRegex = new(
+        @"\b(class|struct|public|private|protected|virtual|override|const|static|void|int32|int64|float|bool|true|false|return|UCLASS|UPROPERTY|UFUNCTION|USTRUCT|UENUM|UMETA|GENERATED_BODY|GENERATED_UCLASS_BODY)\b",
+        System.Text.RegularExpressions.RegexOptions.Compiled);
+
+    private static string AppendSyntaxColored(string code)
+    {
+        var escaped = code
+            .Replace("&", "&amp;")
+            .Replace("<", "&lt;")
+            .Replace(">", "&gt;");
+
+        // Color comments
+        var lines = escaped.Split('\n');
+        var result = new System.Text.StringBuilder();
+        foreach (var line in lines)
+        {
+            var trimmed = line.TrimStart();
+            if (trimmed.StartsWith("//"))
+                result.Append($"<span style=\"color:gray\">{line}</span>\n");
+            else
+                result.Append(KeywordRegex.Replace(line, "<b>$1</b>") + "\n");
+        }
+        return result.ToString().TrimEnd('\n');
     }
 }
