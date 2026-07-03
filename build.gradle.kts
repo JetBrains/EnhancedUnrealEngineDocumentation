@@ -1,3 +1,6 @@
+import java.net.HttpURLConnection
+import java.net.URI
+import java.util.concurrent.TimeUnit
 import java.util.zip.ZipFile
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.changelog.Changelog
@@ -39,6 +42,12 @@ dependencies {
         jetbrainsRuntime()
         bundledPlugin("com.jetbrains.rider-cpp")
     }
+}
+
+// Cache SNAPSHOT SDK for 30 days instead of re-downloading every 24h.
+// To manually update: ./gradlew --refresh-dependencies
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor(30, TimeUnit.DAYS)
 }
 
 intellijPlatform {
@@ -113,6 +122,35 @@ changelog {
 }
 
 tasks {
+    register("checkSdkUpdate") {
+        description = "Checks if a newer Rider SDK snapshot is available without downloading it"
+        group = "help"
+        doLast {
+            val version = properties("platformVersion")
+            val repoUrl = "https://www.jetbrains.com/intellij-repository/snapshots/com/jetbrains/intellij/rider/riderRD/$version/maven-metadata.xml"
+            val cacheMarkerFile = layout.buildDirectory.file("rider-sdk-last-check.txt").get().asFile
+            try {
+                val url = URI(repoUrl).toURL()
+                val conn = url.openConnection() as HttpURLConnection
+                conn.requestMethod = "HEAD"
+                conn.connectTimeout = 5000
+                conn.readTimeout = 5000
+                val lastModified = conn.getHeaderField("Last-Modified") ?: "unknown"
+                conn.disconnect()
+                val cached = if (cacheMarkerFile.exists()) cacheMarkerFile.readText() else ""
+                if (cached == lastModified) {
+                    logger.lifecycle("Rider SDK $version is up to date (last modified: $lastModified)")
+                } else {
+                    logger.warn("⚠ New Rider SDK $version available (last modified: $lastModified). Run './gradlew --refresh-dependencies' to update.")
+                    cacheMarkerFile.parentFile.mkdirs()
+                    cacheMarkerFile.writeText(lastModified)
+                }
+            } catch (e: Exception) {
+                logger.info("Could not check for SDK updates: ${e.message}")
+            }
+        }
+    }
+
     withType<RunIdeTask>().configureEach {
         jvmArgs("-Didea.reset.classpath.from.manifest=true")
     }
@@ -170,9 +208,12 @@ tasks {
         }
     }
 
+    val checkSdkUpdate = named("checkSdkUpdate")
+
     val prepareRiderBuildProps = register("prepareRiderBuildProps") {
         group = "RiderBackend"
         description = "Generates DotNetSdkPath.props for the .NET build"
+        dependsOn(checkSdkUpdate)
         val generatedFile = layout.buildDirectory.file("DotNetSdkPath.generated.props")
 
         outputs.file(generatedFile)
