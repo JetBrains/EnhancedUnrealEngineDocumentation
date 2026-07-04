@@ -60,7 +60,7 @@ kotlin {
 
 sourceSets {
     main {
-        kotlin.srcDir("src/rider/main")
+        kotlin.srcDirs("src/rider/main", "src/rider/main/kotlin")
         resources.srcDir("src/rider/main/resources")
     }
 }
