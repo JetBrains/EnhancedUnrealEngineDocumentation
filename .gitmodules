@@ -1,4 +1,4 @@
 [submodule "documentation"]
 	path = documentation
-	url = https://github.com/DecoyRS/UE-Specifier-Docs
-	branch = fix/image-paths
+	url = https://github.com/JetBrains/UE-Specifier-Docs
+	branch = main
