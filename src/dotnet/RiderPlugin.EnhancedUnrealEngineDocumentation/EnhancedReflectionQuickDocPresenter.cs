@@ -39,35 +39,46 @@ public class EnhancedReflectionQuickDocPresenter : CppUE4SpecifiersQuickDocPrese
     {
         var d = _documentation;
 
-        // Build XmlDocument from YAML — native XmlDocHtmlPresenter renders it identically to UCLASS
-        var xmlDoc = new XmlDocument();
-        var member = xmlDoc.CreateElement("member");
-        xmlDoc.AppendChild(member);
+        // Summary + Remarks in one XML document
+        var mainDoc = new XmlDocument();
+        var mainMember = mainDoc.CreateElement("member");
+        mainDoc.AppendChild(mainMember);
 
         if (!string.IsNullOrEmpty(d.documentation?.text))
         {
-            var summary = xmlDoc.CreateElement("summary");
-            AppendMarkdownAsXml(xmlDoc, summary, d.documentation.text);
-            member.AppendChild(summary);
+            var summary = mainDoc.CreateElement("summary");
+            AppendMarkdownAsXml(mainDoc, summary, d.documentation.text);
+            mainMember.AppendChild(summary);
         }
 
-        if (d.comment != null)
+        var hasLinks = (d.related?.Count > 0) || (d.antonyms?.Count > 0) || (d.incompatible?.Count > 0) || (d.implies?.Count > 0);
+        if (d.comment != null || hasLinks)
         {
-            var remarks = xmlDoc.CreateElement("remarks");
-            AppendMarkdownAsXml(xmlDoc, remarks, d.comment);
-            member.AppendChild(remarks);
+            var remarks = mainDoc.CreateElement("remarks");
+            if (d.comment != null)
+                AppendMarkdownAsXml(mainDoc, remarks, d.comment);
+            AppendLinkGroupToXml(mainDoc, remarks, "Related:",      d.related,      d.category);
+            AppendLinkGroupToXml(mainDoc, remarks, "Opposite:",     d.antonyms,     d.category);
+            AppendLinkGroupToXml(mainDoc, remarks, "Incompatible:", d.incompatible, d.category);
+            AppendLinkGroupToXml(mainDoc, remarks, "Implies:",      d.implies,      d.category);
+            mainMember.AppendChild(remarks);
         }
 
+        // Examples in a separate XML document so links can be inserted between remarks and example
+        XmlElement exampleMember = null;
         if (d.samples is { Count: > 0 })
         {
-            var example = xmlDoc.CreateElement("example");
+            var exampleDoc = new XmlDocument();
+            exampleMember = exampleDoc.CreateElement("member");
+            exampleDoc.AppendChild(exampleMember);
+            var example = exampleDoc.CreateElement("example");
             foreach (var sample in d.samples)
             {
-                var code = xmlDoc.CreateElement("code");
+                var code = exampleDoc.CreateElement("code");
                 code.InnerText = sample.TrimEnd();
                 example.AppendChild(code);
             }
-            member.AppendChild(example);
+            exampleMember.AppendChild(example);
         }
 
         var xmlPresenter = Shell.Instance.GetComponent<XmlDocHtmlPresenter>();
@@ -77,11 +88,9 @@ public class EnhancedReflectionQuickDocPresenter : CppUE4SpecifiersQuickDocPrese
             (builder, output) =>
             {
                 output.Append(formattedTitle);
+                output.Append("<hr/>");
 
-                // Render description/remarks/example exactly like native UCLASS documentation
-                xmlPresenter.AppendBody(builder, output, member, null, null, presentationLanguage, XmlDocHtmlUtil.CrefManager);
-
-                // UPROPERTY signature badge (after body content)
+                // Signature badge right under the divider
                 if (d.position.IsNotEmpty() && d.type.IsNotEmpty())
                 {
                     var attribute = d.category?.ToUpper() ?? "UPROPERTY";
@@ -95,8 +104,15 @@ public class EnhancedReflectionQuickDocPresenter : CppUE4SpecifiersQuickDocPrese
                         "number" or "integer" => $"{d.name}=123",
                         _                     => ""
                     };
-                    output.Append($"<dl class=\"headers\"><dt><code>{prefix}{body}{suffix}</code></dt></dl>");
+                    output.Append($"<p><code>{prefix}{body}{suffix}</code></p>");
                 }
+
+                // Summary + Remarks (links are inside the remarks XML element)
+                xmlPresenter.AppendBody(builder, output, mainMember, null, null, presentationLanguage, XmlDocHtmlUtil.CrefManager);
+
+                // Example
+                if (exampleMember != null)
+                    xmlPresenter.AppendBody(builder, output, exampleMember, null, null, presentationLanguage, XmlDocHtmlUtil.CrefManager);
 
                 // Images
                 if (d.images != null)
@@ -106,21 +122,14 @@ public class EnhancedReflectionQuickDocPresenter : CppUE4SpecifiersQuickDocPrese
                     output.Append("</td></tr></table>");
                 }
 
+                output.Append($"<br><a href=\"https://unreal-garden.com/docs/{d.category}/#{d.name.ToLower()}\">Full Documentation</a>");
                 output.Append("<table width=\"550\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\"><tr><td></td></tr></table>");
             },
             XmlDocHtmlUtil.NavigationStyle.None, _theming);
 
-        // Inline links and Full Documentation — appended after BuildHtml for native pill/button rendering
-        AppendInlineLinks(text, "Related:",      d.related,      d.category);
-        AppendInlineLinks(text, "Opposite:",     d.antonyms,     d.category);
-        AppendInlineLinks(text, "Incompatible:", d.incompatible, d.category);
-        AppendInlineLinks(text, "Implies:",      d.implies,      d.category);
-        text.Append($"<br><a href=\"https://unreal-garden.com/docs/{d.category}/#{d.name.ToLower()}\">Full Documentation</a>");
-
         return new QuickDocTitleAndText(text, _documentation.name.NON_LOCALIZABLE());
     }
 
-    // Convert backtick markdown to <c> elements for proper inline code rendering
     private static void AppendMarkdownAsXml(XmlDocument doc, XmlElement parent, string text)
     {
         var parts = text.Split('`');
@@ -135,17 +144,63 @@ public class EnhancedReflectionQuickDocPresenter : CppUE4SpecifiersQuickDocPrese
             }
             else
             {
-                parent.AppendChild(doc.CreateTextNode(parts[i]));
+                AppendTextWithMarkdownLinks(doc, parent, parts[i]);
             }
         }
     }
 
-    private static void AppendInlineLinks(RichText output, string label, System.Collections.Generic.List<string> items, string category)
+    private static void AppendTextWithMarkdownLinks(XmlDocument doc, XmlElement parent, string text)
+    {
+        var remaining = text;
+        while (remaining.Length > 0)
+        {
+            var linkStart = remaining.IndexOf('[');
+            if (linkStart < 0) { parent.AppendChild(doc.CreateTextNode(remaining)); break; }
+
+            if (linkStart > 0)
+                parent.AppendChild(doc.CreateTextNode(remaining.Substring(0, linkStart)));
+
+            var textEnd = remaining.IndexOf(']', linkStart);
+            if (textEnd < 0 || textEnd + 1 >= remaining.Length || remaining[textEnd + 1] != '(')
+            {
+                parent.AppendChild(doc.CreateTextNode(remaining.Substring(linkStart)));
+                break;
+            }
+
+            var urlStart = textEnd + 2;
+            var urlEnd = remaining.IndexOf(')', urlStart);
+            if (urlEnd < 0) { parent.AppendChild(doc.CreateTextNode(remaining.Substring(linkStart))); break; }
+
+            var linkText = remaining.Substring(linkStart + 1, textEnd - linkStart - 1).Trim();
+            var url = remaining.Substring(urlStart, urlEnd - urlStart).Trim();
+
+            if (!string.IsNullOrEmpty(url) && !string.IsNullOrEmpty(linkText))
+            {
+                var see = doc.CreateElement("see");
+                see.SetAttribute("href", url);
+                see.AppendChild(doc.CreateTextNode(linkText));
+                parent.AppendChild(see);
+            }
+            // [](url) — empty-text links are invisible in markdown, skip them
+
+            remaining = remaining.Substring(urlEnd + 1);
+        }
+    }
+
+    private static void AppendLinkGroupToXml(XmlDocument doc, XmlElement parent, string label, System.Collections.Generic.List<string> items, string category)
     {
         if (items is not { Count: > 0 }) return;
-        output.Append($"{label} ");
-        output.Append(items.Select(it =>
-            $"<a href=\"https://unreal-garden.com/docs/{category}/#{it.ToLower()}\">{it}</a>").Join(", "));
-        output.Append("<br>");
+        var para = doc.CreateElement("para");
+        para.AppendChild(doc.CreateTextNode($"{label} "));
+        for (var i = 0; i < items.Count; i++)
+        {
+            var see = doc.CreateElement("see");
+            see.SetAttribute("href", $"https://unreal-garden.com/docs/{category}/#{items[i].ToLower()}");
+            see.AppendChild(doc.CreateTextNode(items[i]));
+            para.AppendChild(see);
+            if (i < items.Count - 1)
+                para.AppendChild(doc.CreateTextNode(", "));
+        }
+//        parent.AppendChild(para);
     }
 }
