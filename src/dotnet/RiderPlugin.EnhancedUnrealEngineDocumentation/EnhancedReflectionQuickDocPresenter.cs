@@ -57,10 +57,12 @@ public class EnhancedReflectionQuickDocPresenter : CppUE4SpecifiersQuickDocPrese
             var remarks = mainDoc.CreateElement("remarks");
             if (d.comment != null)
                 AppendMarkdownAsXml(mainDoc, remarks, d.comment);
-            AppendLinkGroupToXml(mainDoc, remarks, "Related:",      d.related,      d.category);
-            AppendLinkGroupToXml(mainDoc, remarks, "Opposite:",     d.antonyms,     d.category);
-            AppendLinkGroupToXml(mainDoc, remarks, "Incompatible:", d.incompatible, d.category);
-            AppendLinkGroupToXml(mainDoc, remarks, "Implies:",      d.implies,      d.category);
+            var linkPara = mainDoc.CreateElement("para");
+            AppendLinkGroupToXml(mainDoc, linkPara, "Related:",      d.related,      d.category);
+            AppendLinkGroupToXml(mainDoc, linkPara, "Opposite:",     d.antonyms,     d.category);
+            AppendLinkGroupToXml(mainDoc, linkPara, "Incompatible:", d.incompatible, d.category);
+            AppendLinkGroupToXml(mainDoc, linkPara, "Implies:",      d.implies,      d.category);
+            if (linkPara.HasChildNodes) remarks.AppendChild(linkPara);
             mainMember.AppendChild(remarks);
         }
 
@@ -174,14 +176,13 @@ public class EnhancedReflectionQuickDocPresenter : CppUE4SpecifiersQuickDocPrese
             var linkText = remaining.Substring(linkStart + 1, textEnd - linkStart - 1).Trim();
             var url = remaining.Substring(urlStart, urlEnd - urlStart).Trim();
 
-            if (!string.IsNullOrEmpty(url) && !string.IsNullOrEmpty(linkText))
+            if (!string.IsNullOrEmpty(url))
             {
                 var see = doc.CreateElement("see");
                 see.SetAttribute("href", url);
-                see.AppendChild(doc.CreateTextNode(linkText));
+                see.AppendChild(doc.CreateTextNode(!string.IsNullOrEmpty(linkText) ? linkText : "link"));
                 parent.AppendChild(see);
             }
-            // [](url) — empty-text links are invisible in markdown, skip them
 
             remaining = remaining.Substring(urlEnd + 1);
         }
@@ -190,17 +191,31 @@ public class EnhancedReflectionQuickDocPresenter : CppUE4SpecifiersQuickDocPrese
     private static void AppendLinkGroupToXml(XmlDocument doc, XmlElement parent, string label, System.Collections.Generic.List<string> items, string category)
     {
         if (items is not { Count: > 0 }) return;
-        var para = doc.CreateElement("para");
-        para.AppendChild(doc.CreateTextNode($"{label} "));
+        if (parent.HasChildNodes)
+            parent.AppendChild(doc.CreateElement("br"));
+        parent.AppendChild(doc.CreateTextNode($"{label} "));
         for (var i = 0; i < items.Count; i++)
         {
+            // Support cross-category refs like "uclass.Config" → /docs/uclass/#config
+            var item = items[i];
+            string href;
+            var dot = item.IndexOf('.');
+            if (dot > 0)
+            {
+                var cat = item.Substring(0, dot).ToLower();
+                var name = item.Substring(dot + 1).ToLower();
+                href = $"https://unreal-garden.com/docs/{cat}/#{name}";
+            }
+            else
+            {
+                href = $"https://unreal-garden.com/docs/{category}/#{item.ToLower()}";
+            }
             var see = doc.CreateElement("see");
-            see.SetAttribute("href", $"https://unreal-garden.com/docs/{category}/#{items[i].ToLower()}");
-            see.AppendChild(doc.CreateTextNode(items[i]));
-            para.AppendChild(see);
+            see.SetAttribute("href", href);
+            see.AppendChild(doc.CreateTextNode(item));
+            parent.AppendChild(see);
             if (i < items.Count - 1)
-                para.AppendChild(doc.CreateTextNode(", "));
+                parent.AppendChild(doc.CreateTextNode(", "));
         }
-//        parent.AppendChild(para);
     }
 }
