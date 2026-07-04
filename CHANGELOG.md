@@ -7,9 +7,18 @@ The EnhancedUnrealEngineDocumentation plugin adds a convenient way to get improv
 
 ## [Unreleased]
 
+## [1.0.25]
+
+### Changed
+
+- Rework Quick Doc rendering to match Rider's native documentation look: divider under the title, signature badge (UPROPERTY/UCLASS/UFUNCTION/...) moved right under it, native section layout, syntax highlighting and link groups (Related, Incompatible, etc.) rendered as part of the Remarks block
+- Verify compatibility with 2026.1, 2026.2 and 2026.3 (261, 262, 263)
+
 ### Fixed
 
 - Fix a bug introduced in the previous release, when Quick Doc was presenting only for a symbol under caret, ignoring mouse position
+- Fix broken image links in documentation after retargeting the documentation submodule to the canonical JetBrains/UE-Specifier-Docs repo
+- Fix signature badge always showing "UPROPERTY" instead of the actual macro (UCLASS, UFUNCTION, ...)
 
 ## [1.0.23]
 
