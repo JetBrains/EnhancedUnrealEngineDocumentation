@@ -7,6 +7,10 @@ The EnhancedUnrealEngineDocumentation plugin adds a convenient way to get improv
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix Quick Doc silently falling back to the default documentation for several reflection specifiers that were documented for one macro type but missing for another, e.g. `Category` and `ScriptName` were shown for `UPROPERTY` but not `UFUNCTION`. Also fixes a `MinimalAPI`/`MinimalApi` casing mismatch on `UINTERFACE` that broke its Quick Doc lookup, and adds missing `Blueprintable`/`NotBlueprintable` (`UINTERFACE`), `GetByRef`/`NoGetter` (`UPROPERTY`), and `Bitmask`/`BitmaskEnum` (`UPARAM`) entries
+
 ## [1.0.25]
 
 ### Changed
